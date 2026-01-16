@@ -1,0 +1,25 @@
+services:
+  grafana:
+    user: root
+    container_name: 'tim012432-calendarheatmap-panel'
+
+    build:
+      context: .
+      args:
+        grafana_image: ${GRAFANA_IMAGE:-grafana-enterprise}
+        grafana_version: ${GRAFANA_VERSION:-12.3.1}
+        development: ${DEVELOPMENT:-false}
+        anonymous_auth_enabled: ${ANONYMOUS_AUTH_ENABLED:-true}
+    ports:
+      - 3000:3000/tcp
+    volumes:
+      - ../dist:/var/lib/grafana/plugins/tim012432-calendarheatmap-panel
+      - ../provisioning:/etc/grafana/provisioning
+      - ..:/root/tim012432-calendarheatmap-panel
+
+    environment:
+      NODE_ENV: development
+      GF_LOG_FILTERS: plugin.tim012432-calendarheatmap-panel:debug
+      GF_LOG_LEVEL: debug
+      GF_DATAPROXY_LOGGING: 1
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: tim012432-calendarheatmap-panel

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "panel",
+  "name": "Calendar-Heatmap-Panel",
+  "id": "tim012432-calendarheatmap-panel",
+  "info": {
+    "keywords": ["heatmap", "calendar", "github", "contributions", "activity"],
+    "description": "",
+    "author": {
+      "name": "Tim0-12432",
+      "url": "https://github.com/tim0-12432"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=11.6.0",
+    "plugins": []
+  }
+}
