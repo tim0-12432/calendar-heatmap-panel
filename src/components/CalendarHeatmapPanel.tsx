@@ -50,7 +50,9 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({
 
   // Calculate max value for legend
   const maxValue = useMemo(() => {
-    if (heatmapData.length === 0) return 0;
+    if (heatmapData.length === 0) {
+        return 0;
+    }
     return Math.max(...heatmapData.map(d => d.count));
   }, [heatmapData]);
 

@@ -53,7 +53,9 @@ export function processTimeSeriesData(
 }
 
 function aggregate(values: number[], method: Aggregation): number {
-  if (values.length === 0) return 0;
+  if (values.length === 0) {
+    return 0;
+  }
 
   switch (method) {
     case 'sum':
