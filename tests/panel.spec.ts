@@ -125,7 +125,7 @@ test('legend can be toggled on and off', async ({ gotoPanelEditPage, readProvisi
 
   const legendLess = panelEditPage.panel.locator.getByText('Less');
   const legendMore = panelEditPage.panel.locator.getByText('More');
-  const legendSwitch = page.getByRole('switch', { name: /show legend/i });
+  const legendSwitch = panelEditPage.getCustomOptions('Labels').getSwitch('Show Legend').locator();
 
   await expect(legendSwitch).toBeVisible({ timeout: EXPECT_TIMEOUT });
   await expect(legendLess).toBeVisible({ timeout: EXPECT_TIMEOUT });
@@ -148,7 +148,7 @@ test('week labels can be hidden and shown again', async ({ gotoPanelEditPage, re
   });
 
   const weekLabels = panelEditPage.panel.locator.locator(WEEK_LABEL_SELECTOR);
-  const weekLabelsSwitch = page.getByRole('switch', { name: /show week labels/i });
+  const weekLabelsSwitch = panelEditPage.getCustomOptions('Labels').getSwitch('Show Week Labels').locator();
 
   await expect(weekLabelsSwitch).toBeVisible({ timeout: EXPECT_TIMEOUT });
   await expect(weekLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
@@ -168,7 +168,7 @@ test('month labels can be hidden and shown again', async ({ gotoPanelEditPage, r
   });
 
   const monthLabels = panelEditPage.panel.locator.locator(MONTH_LABEL_SELECTOR);
-  const monthLabelsSwitch = page.getByRole('switch', { name: /show month labels/i });
+  const monthLabelsSwitch = panelEditPage.getCustomOptions('Labels').getSwitch('Show Month Labels').locator();
 
   await expect(monthLabelsSwitch).toBeVisible({ timeout: EXPECT_TIMEOUT });
 
