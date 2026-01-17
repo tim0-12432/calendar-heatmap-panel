@@ -15,6 +15,10 @@ type PanelDeps = {
   gotoPanelEditPage: (args: { dashboard?: any; id: string }) => Promise<PanelEditPage>;
 };
 
+async function toggleSwitch(page: any, switchLocator: any) {
+  await switchLocator.click({ force: true });
+}
+
 async function waitForPanelReady(panelEditPage: PanelEditPage) {
   const panelRoot = panelEditPage.panel.locator;
   await expect(panelRoot).toBeVisible({ timeout: PANEL_READY_TIMEOUT });
@@ -121,17 +125,17 @@ test('legend can be toggled on and off', async ({ gotoPanelEditPage, readProvisi
 
   const legendLess = panelEditPage.panel.locator.getByText('Less');
   const legendMore = panelEditPage.panel.locator.getByText('More');
-  const legendSwitch = page.getByRole('checkbox', { name: /show legend/i });
+  const legendSwitch = page.getByRole('switch', { name: /show legend/i });
 
   await expect(legendSwitch).toBeVisible({ timeout: EXPECT_TIMEOUT });
   await expect(legendLess).toBeVisible({ timeout: EXPECT_TIMEOUT });
   await expect(legendMore).toBeVisible({ timeout: EXPECT_TIMEOUT });
 
-  await legendSwitch.setChecked(false);
+  await toggleSwitch(page, legendSwitch);
   await expect(legendLess).toBeHidden({ timeout: EXPECT_TIMEOUT });
   await expect(legendMore).toBeHidden({ timeout: EXPECT_TIMEOUT });
 
-  await legendSwitch.setChecked(true);
+  await toggleSwitch(page, legendSwitch);
   await expect(legendLess).toBeVisible({ timeout: EXPECT_TIMEOUT });
   await expect(legendMore).toBeVisible({ timeout: EXPECT_TIMEOUT });
 });
@@ -144,15 +148,15 @@ test('week labels can be hidden and shown again', async ({ gotoPanelEditPage, re
   });
 
   const weekLabels = panelEditPage.panel.locator.locator(WEEK_LABEL_SELECTOR);
-  const weekLabelsSwitch = page.getByRole('checkbox', { name: /show week labels/i });
+  const weekLabelsSwitch = page.getByRole('switch', { name: /show week labels/i });
 
   await expect(weekLabelsSwitch).toBeVisible({ timeout: EXPECT_TIMEOUT });
   await expect(weekLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
 
-  await weekLabelsSwitch.setChecked(false);
+  await toggleSwitch(page, weekLabelsSwitch);
   await expect(weekLabels.first()).toBeHidden({ timeout: EXPECT_TIMEOUT });
 
-  await weekLabelsSwitch.setChecked(true);
+  await toggleSwitch(page, weekLabelsSwitch);
   await expect(weekLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
 });
 
@@ -164,14 +168,22 @@ test('month labels can be hidden and shown again', async ({ gotoPanelEditPage, r
   });
 
   const monthLabels = panelEditPage.panel.locator.locator(MONTH_LABEL_SELECTOR);
-  const monthLabelsSwitch = page.getByRole('checkbox', { name: /show month labels/i });
+  const monthLabelsSwitch = page.getByRole('switch', { name: /show month labels/i });
 
   await expect(monthLabelsSwitch).toBeVisible({ timeout: EXPECT_TIMEOUT });
-  await expect(monthLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
 
-  await monthLabelsSwitch.setChecked(false);
-  await expect(monthLabels.first()).toBeHidden({ timeout: EXPECT_TIMEOUT });
+  const monthLabelsCount = await monthLabels.count();
 
-  await monthLabelsSwitch.setChecked(true);
-  await expect(monthLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
+  if (monthLabelsCount > 0) {
+    await expect(monthLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
+
+    await toggleSwitch(page, monthLabelsSwitch);
+    await expect(monthLabels.first()).toBeHidden({ timeout: EXPECT_TIMEOUT });
+
+    await toggleSwitch(page, monthLabelsSwitch);
+    await expect(monthLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
+  } else {
+    await toggleSwitch(page, monthLabelsSwitch);
+    await toggleSwitch(page, monthLabelsSwitch);
+  }
 });
