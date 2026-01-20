@@ -186,7 +186,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({
               key={key}
               className={styles.legendRect}
               style={{ backgroundColor: color }}
-              title={`Level ${key}`}
+              title={t('panel.component.legend.tooltip', 'Level {{level}}', { level: key })}
             />
             ))}
           <span>{t('panel.component.legend.more', 'More')}</span>

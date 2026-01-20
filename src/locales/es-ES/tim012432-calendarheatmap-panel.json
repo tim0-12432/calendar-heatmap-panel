@@ -4,7 +4,8 @@
       "legend": {
         "less": "Menos",
         "max": "Máximo",
-        "more": "Más"
+        "more": "Más",
+        "tooltip": "Nivel {{level}}"
       },
       "monthLabels": {
         "apr": "Abr",
