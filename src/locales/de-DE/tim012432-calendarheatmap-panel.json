@@ -1,0 +1,95 @@
+{
+  "panel": {
+    "component": {
+      "legend": {
+        "less": "Weniger",
+        "max": "Max",
+        "more": "Mehr"
+      },
+      "monthLabels": {
+        "apr": "Apr",
+        "aug": "Aug",
+        "dec": "Dez",
+        "feb": "Feb",
+        "jan": "Jan",
+        "jul": "Jul",
+        "jun": "Jun",
+        "mar": "Mär",
+        "may": "Mai",
+        "nov": "Nov",
+        "oct": "Okt",
+        "sep": "Sep"
+      },
+      "noData": "Keine Daten verfügbar",
+      "tooltip": {
+        "noData": "Keine Daten"
+      },
+      "weekLabels": {
+        "fri": "Fr",
+        "mon": "Mo",
+        "sat": "Sa",
+        "sun": "So",
+        "thu": "Do",
+        "tue": "Di",
+        "wed": "Mi"
+      }
+    },
+    "options": {
+      "aggregation": {
+        "description": "Wie mehrere Datenpunkte am selben Tag aggregiert werden",
+        "name": "Aggregation",
+        "options": {
+          "avg": "Durchschnitt",
+          "count": "Anzahl",
+          "max": "Maximum",
+          "min": "Minimum",
+          "sum": "Summe"
+        }
+      },
+      "autoRectSize": {
+        "description": "Automatisch Zellen an die Panelbreite anpassen",
+        "name": "Automatische Zellengröße"
+      },
+      "colorScheme": {
+        "description": "Farbpalette für die Heatmap",
+        "name": "Farbschema",
+        "options": {
+          "blue": "Blau",
+          "green": "Grün",
+          "orange": "Orange",
+          "purple": "Lila",
+          "red": "Rot",
+          "yellow": "Gelb"
+        }
+      },
+      "radius": {
+        "description": "Eckenradius der Zellen",
+        "name": "Eckenradius"
+      },
+      "rectSize": {
+        "description": "Größe jeder Tageszelle in Pixel",
+        "name": "Zellgröße"
+      },
+      "showLegend": {
+        "description": "Farbige Legende anzeigen",
+        "name": "Legende anzeigen"
+      },
+      "showMonthLabels": {
+        "description": "Monate anzeigen",
+        "name": "Monatsbeschriftungen anzeigen"
+      },
+      "showTooltip": {
+        "description": "Tooltip beim Überfahren anzeigen",
+        "name": "Tooltip anzeigen"
+      },
+      "showWeekLabels": {
+        "description": "Wochentage anzeigen",
+        "name": "Wochentagsbeschriftungen anzeigen"
+      },
+      "space": {
+        "description": "Abstand zwischen Zellen in Pixel",
+        "name": "Zellenabstand"
+      }
+    }
+  }
+}

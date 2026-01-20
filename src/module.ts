@@ -1,6 +1,10 @@
 import { PanelPlugin } from '@grafana/data';
 import { CalendarHeatmapPanel } from './components/CalendarHeatmapPanel';
 import { CalendarHeatmapOptions } from './types';
+import { initPluginTranslations, t } from '@grafana/i18n';
+import pluginJson from './plugin.json';
+
+await initPluginTranslations(pluginJson.id);
 
 export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
   CalendarHeatmapPanel
@@ -10,18 +14,18 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
       // Color settings
       .addSelect({
         path: 'colorScheme',
-        name: 'Color Scheme',
-        description: 'Color palette for the heatmap',
+        name: t('panel.options.colorScheme.name', 'Color Scheme'),
+        description: t('panel.options.colorScheme.description', 'Color palette for the heatmap'),
         defaultValue: 'green',
         category: ['Colors'],
         settings: {
           options: [
-            { value: 'green', label: 'Green' },
-            { value: 'blue', label: 'Blue' },
-            { value: 'red', label: 'Red' },
-            { value: 'yellow', label: 'Yellow' },
-            { value: 'purple', label: 'Purple' },
-            { value: 'orange', label: 'Orange' },
+            { value: 'green', label: t('panel.options.colorScheme.options.green', 'Green') },
+            { value: 'blue', label: t('panel.options.colorScheme.options.blue', 'Blue') },
+            { value: 'red', label: t('panel.options.colorScheme.options.red', 'Red') },
+            { value: 'yellow', label: t('panel.options.colorScheme.options.yellow', 'Yellow') },
+            { value: 'purple', label: t('panel.options.colorScheme.options.purple', 'Purple') },
+            { value: 'orange', label: t('panel.options.colorScheme.options.orange', 'Orange') },
           ],
         },
       })
@@ -29,15 +33,15 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
       // Layout settings
       .addBooleanSwitch({
         path: 'autoRectSize',
-        name: 'Auto Cell Size',
-        description: 'Automatically fit cells to the panel width',
+        name: t('panel.options.autoRectSize.name', 'Auto Cell Size'),
+        description: t('panel.options.autoRectSize.description', 'Automatically fit cells to the panel width'),
         defaultValue: true,
         category: ['Layout'],
       })
       .addSliderInput({
         path: 'rectSize',
-        name: 'Cell Size',
-        description: 'Size of each day cell in pixels',
+        name: t('panel.options.rectSize.name', 'Cell Size'),
+        description: t('panel.options.rectSize.description', 'Size of each day cell in pixels'),
         defaultValue: 11,
         category: ['Layout'],
         settings: {
@@ -45,11 +49,12 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
           max: 20,
           step: 1,
         },
+        showIf: (options) => !options.autoRectSize,
       })
       .addSliderInput({
         path: 'space',
-        name: 'Cell Spacing',
-        description: 'Space between cells in pixels',
+        name: t('panel.options.space.name', 'Cell Spacing'),
+        description: t('panel.options.space.description', 'Space between cells in pixels'),
         defaultValue: 3,
         category: ['Layout'],
         settings: {
@@ -60,8 +65,8 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
       })
       .addSliderInput({
         path: 'radius',
-        name: 'Corner Radius',
-        description: 'Border radius of cells',
+        name: t('panel.options.radius.name', 'Corner Radius'),
+        description: t('panel.options.radius.description', 'Border radius of cells'),
         defaultValue: 2,
         category: ['Layout'],
         settings: {
@@ -74,22 +79,22 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
       // Label settings
       .addBooleanSwitch({
         path: 'showWeekLabels',
-        name: 'Show Week Labels',
-        description: 'Display day of week labels',
+        name: t('panel.options.showWeekLabels.name', 'Show Week Labels'),
+        description: t('panel.options.showWeekLabels.description', 'Display day of week labels'),
         defaultValue: true,
         category: ['Labels'],
       })
       .addBooleanSwitch({
         path: 'showMonthLabels',
-        name: 'Show Month Labels',
-        description: 'Display month labels',
+        name: t('panel.options.showMonthLabels.name', 'Show Month Labels'),
+        description: t('panel.options.showMonthLabels.description', 'Display month labels'),
         defaultValue: true,
         category: ['Labels'],
       })
       .addBooleanSwitch({
         path: 'showLegend',
-        name: 'Show Legend',
-        description: 'Display color legend',
+        name: t('panel.options.showLegend.name', 'Show Legend'),
+        description: t('panel.options.showLegend.description', 'Display color legend'),
         defaultValue: true,
         category: ['Labels'],
       })
@@ -97,17 +102,17 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
       // Data settings
       .addSelect({
         path: 'aggregation',
-        name: 'Aggregation',
-        description: 'How to aggregate multiple data points on the same day',
+        name: t('panel.options.aggregation.name', 'Aggregation'),
+        description: t('panel.options.aggregation.description', 'How to aggregate multiple data points on the same day'),
         defaultValue: 'sum',
         category: ['Data'],
         settings: {
           options: [
-            { value: 'sum', label: 'Sum' },
-            { value: 'count', label: 'Count' },
-            { value: 'avg', label: 'Average' },
-            { value: 'max', label: 'Maximum' },
-            { value: 'min', label: 'Minimum' },
+            { value: 'sum', label: t('panel.options.aggregation.options.sum', 'Sum') },
+            { value: 'count', label: t('panel.options.aggregation.options.count', 'Count') },
+            { value: 'avg', label: t('panel.options.aggregation.options.avg', 'Average') },
+            { value: 'max', label: t('panel.options.aggregation.options.max', 'Maximum') },
+            { value: 'min', label: t('panel.options.aggregation.options.min', 'Minimum') },
           ],
         },
       })
@@ -115,8 +120,8 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
       // Interaction
       .addBooleanSwitch({
         path: 'showTooltip',
-        name: 'Show Tooltip',
-        description: 'Show tooltip on hover',
+        name: t('panel.options.showTooltip.name', 'Show Tooltip'),
+        description: t('panel.options.showTooltip.description', 'Show tooltip on hover'),
         defaultValue: true,
         category: ['Interaction'],
       });

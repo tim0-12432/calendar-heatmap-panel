@@ -1,0 +1,95 @@
+{
+  "panel": {
+    "component": {
+      "legend": {
+        "less": "Less",
+        "max": "Max",
+        "more": "More"
+      },
+      "monthLabels": {
+        "apr": "Apr",
+        "aug": "Aug",
+        "dec": "Dec",
+        "feb": "Feb",
+        "jan": "Jan",
+        "jul": "Jul",
+        "jun": "Jun",
+        "mar": "Mar",
+        "may": "May",
+        "nov": "Nov",
+        "oct": "Oct",
+        "sep": "Sep"
+      },
+      "noData": "No data available",
+      "tooltip": {
+        "noData": "No data"
+      },
+      "weekLabels": {
+        "fri": "Fri",
+        "mon": "Mon",
+        "sat": "Sat",
+        "sun": "Sun",
+        "thu": "Thu",
+        "tue": "Tue",
+        "wed": "Wed"
+      }
+    },
+    "options": {
+      "aggregation": {
+        "description": "How to aggregate multiple data points on the same day",
+        "name": "Aggregation",
+        "options": {
+          "avg": "Average",
+          "count": "Count",
+          "max": "Maximum",
+          "min": "Minimum",
+          "sum": "Sum"
+        }
+      },
+      "autoRectSize": {
+        "description": "Automatically fit cells to the panel width",
+        "name": "Auto Cell Size"
+      },
+      "colorScheme": {
+        "description": "Color palette for the heatmap",
+        "name": "Color Scheme",
+        "options": {
+          "blue": "Blue",
+          "green": "Green",
+          "orange": "Orange",
+          "purple": "Purple",
+          "red": "Red",
+          "yellow": "Yellow"
+        }
+      },
+      "radius": {
+        "description": "Border radius of cells",
+        "name": "Corner Radius"
+      },
+      "rectSize": {
+        "description": "Size of each day cell in pixels",
+        "name": "Cell Size"
+      },
+      "showLegend": {
+        "description": "Display color legend",
+        "name": "Show Legend"
+      },
+      "showMonthLabels": {
+        "description": "Display month labels",
+        "name": "Show Month Labels"
+      },
+      "showTooltip": {
+        "description": "Show tooltip on hover",
+        "name": "Show Tooltip"
+      },
+      "showWeekLabels": {
+        "description": "Display day of week labels",
+        "name": "Show Week Labels"
+      },
+      "space": {
+        "description": "Space between cells in pixels",
+        "name": "Cell Spacing"
+      }
+    }
+  }
+}

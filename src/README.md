@@ -1,8 +1,14 @@
-# Calendar Heatmap Panel
+<div align="center">
+
+<img src="https://github.com/tim0-12432/calendar-heatmap-panel/raw/main/src/img/logo.svg" height="100" alt="Calendar Heatmap Panel logo" />
+
+<h1>Calendar Heatmap Panel</h1>
 
 Turn raw time-series data into an instantly readable, GitHub-style activity calendar. Calendar Heatmap Panel makes trends, spikes, and gaps obvious at a glance—perfect for dashboards built for action.
 
-![Calendar Heatmap Panel logo](https://github.com/tim0-12432/calendar-heatmap-panel/raw/main/src/img/logo.svg)
+</div>
+
+---
 
 ## Visual showcase
 

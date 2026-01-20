@@ -23,7 +23,7 @@ jobs:
       has-backend: ${{ steps.check-for-backend.outputs.has-backend }}
     env:
       GRAFANA_ACCESS_POLICY_TOKEN: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
-      GRAFANA_PLUGIN_ROOT_URLS: https://grafana.com
+      # GRAFANA_PLUGIN_ROOT_URLS: https://grafana.com
     steps:
       - uses: actions/checkout@v6
         with:
@@ -82,10 +82,9 @@ jobs:
             echo "has-e2e=true" >> $GITHUB_OUTPUT
           fi
 
-      # Needs Grafana review before signing is possible
-      # - name: Sign plugin
-      #   run: npm run sign
-      #   if: ${{ env.GRAFANA_ACCESS_POLICY_TOKEN != '' }}
+      - name: Sign plugin
+        run: npm run sign
+        if: ${{ env.GRAFANA_ACCESS_POLICY_TOKEN != '' }}
 
       - name: Get plugin metadata
         id: metadata

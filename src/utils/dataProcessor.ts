@@ -98,7 +98,10 @@ export function getColorPalette(
   // We generate strictly increasing *exclusive upper bounds* for the 4 shade buckets.
   const safeMax = Number.isFinite(maxCount) ? Math.max(0, Math.ceil(maxCount)) : 0;
   const shadeQuantiles = [0.25, 0.5, 0.75, 1];
-  const shades = ['super-light', 'light', 'semi-dark', 'dark'];
+  let shades = ['super-light', 'light', 'semi-dark', 'dark'];
+  if (theme.isDark) {
+    shades = Array.from(shades).reverse();
+  }
 
   const palette: Record<number, string> = {
     0: emptyColor,

@@ -1,0 +1,95 @@
+{
+  "panel": {
+    "component": {
+      "legend": {
+        "less": "Menos",
+        "max": "Máximo",
+        "more": "Más"
+      },
+      "monthLabels": {
+        "apr": "Abr",
+        "aug": "Ago",
+        "dec": "Dic",
+        "feb": "Feb",
+        "jan": "Ene",
+        "jul": "Jul",
+        "jun": "Jun",
+        "mar": "Mar",
+        "may": "May",
+        "nov": "Nov",
+        "oct": "Oct",
+        "sep": "Sep"
+      },
+      "noData": "No hay datos disponibles",
+      "tooltip": {
+        "noData": "No hay datos"
+      },
+      "weekLabels": {
+        "fri": "vie",
+        "mon": "lun",
+        "sat": "sáb",
+        "sun": "dom",
+        "thu": "jue",
+        "tue": "mar",
+        "wed": "mié"
+      }
+    },
+    "options": {
+      "aggregation": {
+        "description": "Cómo agregar múltiples puntos de datos en el mismo día",
+        "name": "Agregación",
+        "options": {
+          "avg": "Promedio",
+          "count": "Cuenta",
+          "max": "Máximo",
+          "min": "Mínimo",
+          "sum": "Suma"
+        }
+      },
+      "autoRectSize": {
+        "description": "Ajustar automáticamente las celdas al ancho del panel",
+        "name": "Tamaño automático de celda"
+      },
+      "colorScheme": {
+        "description": "Paleta de colores para el mapa de calor",
+        "name": "Esquema de colores",
+        "options": {
+          "blue": "Azul",
+          "green": "Verde",
+          "orange": "Naranja",
+          "purple": "Púrpura",
+          "red": "Rojo",
+          "yellow": "Amarillo"
+        }
+      },
+      "radius": {
+        "description": "Radio de las celdas del mapa de calor",
+        "name": "Radio de esquina"
+      },
+      "rectSize": {
+        "description": "Tamaño de cada celda diaria en píxeles",
+        "name": "Tamaño de celda"
+      },
+      "showLegend": {
+        "description": "Mostrar la leyenda del mapa de calor",
+        "name": "Mostrar leyenda"
+      },
+      "showMonthLabels": {
+        "description": "Mostrar etiquetas de los meses",
+        "name": "Mostrar etiquetas de mes"
+      },
+      "showTooltip": {
+        "description": "Mostrar información sobre herramientas al pasar el cursor",
+        "name": "Mostrar información sobre herramientas"
+      },
+      "showWeekLabels": {
+        "description": "Mostrar etiquetas de los días de la semana",
+        "name": "Mostrar etiquetas de semana"
+      },
+      "space": {
+        "description": "Espacio entre celdas en píxeles",
+        "name": "Espacio"
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@ import HeatMap from '@uiw/react-heat-map';
 import { CalendarHeatmapOptions } from '../types';
 import { processTimeSeriesData, getColorPalette } from '../utils/dataProcessor';
 import { css } from '@emotion/css';
+import { t } from '@grafana/i18n';
 
 interface Props extends PanelProps<CalendarHeatmapOptions> {}
 
@@ -102,7 +103,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({
     legendRect: css`
       width: 12px;
       height: 12px;
-      border-radius: ${options.radius}px;
+      border-radius: calc(${options.radius}px / 2);
     `,
     noData: css`
       color: ${theme.colors.text.secondary};
@@ -114,7 +115,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({
   if (data.series.length === 0) {
     return (
       <div className={styles.container}>
-        <span className={styles.noData}>No data available</span>
+        <span className={styles.noData}>{t('panel.component.noData', 'No data available')}</span>
       </div>
     );
   }
@@ -132,18 +133,37 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({
         space={options.space}
         radius={options.radius}
         legendCellSize={0} // We'll render custom legend
-        weekLabels={options.showWeekLabels ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : false}
-        monthLabels={options.showMonthLabels ? 
-          ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] : false
-        }
+        weekLabels={options.showWeekLabels ? [
+          t('panel.component.weekLabels.sun', 'Sun'),
+          t('panel.component.weekLabels.mon', 'Mon'),
+          t('panel.component.weekLabels.tue', 'Tue'),
+          t('panel.component.weekLabels.wed', 'Wed'),
+          t('panel.component.weekLabels.thu', 'Thu'),
+          t('panel.component.weekLabels.fri', 'Fri'),
+          t('panel.component.weekLabels.sat', 'Sat'),
+        ] : false}
+        monthLabels={options.showMonthLabels ? [
+          t('panel.component.monthLabels.jan', 'Jan'),
+          t('panel.component.monthLabels.feb', 'Feb'),
+          t('panel.component.monthLabels.mar', 'Mar'),
+          t('panel.component.monthLabels.apr', 'Apr'),
+          t('panel.component.monthLabels.may', 'May'),
+          t('panel.component.monthLabels.jun', 'Jun'),
+          t('panel.component.monthLabels.jul', 'Jul'),
+          t('panel.component.monthLabels.aug', 'Aug'),
+          t('panel.component.monthLabels.sep', 'Sep'),
+          t('panel.component.monthLabels.oct', 'Oct'),
+          t('panel.component.monthLabels.nov', 'Nov'),
+          t('panel.component.monthLabels.dec', 'Dec'),
+        ] : false}
         panelColors={colors}
         rectRender={(props, data) => {
           const tooltipContent = data.count !== undefined 
             ? `${data.date}: ${data.count.toLocaleString()}`
-            : `${data.date}: No data`;
+            : `${data.date}: ${t('panel.component.tooltip.noData', 'No data')}`;
 
           if (!options.showTooltip) {
-            return <rect {...props} />;
+            return <rect {...props} rx={options.radius} />;
           }
 
           return (
@@ -156,7 +176,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({
 
       {options.showLegend && (
         <div className={styles.legend}>
-          <span>Less</span>
+          <span>{t('panel.component.legend.less', 'Less')}</span>
           {Object.entries(colors)
             .map(([key, color]) => [Number(key), color] as const)
             .filter(([key]) => !Number.isNaN(key) && key !== 1)
@@ -169,8 +189,8 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({
               title={`Level ${key}`}
             />
             ))}
-          <span>More</span>
-          {maxValue > 0 && <span style={{ marginLeft: 8 }}>(Max: {maxValue.toLocaleString()})</span>}
+          <span>{t('panel.component.legend.more', 'More')}</span>
+          {maxValue > 0 && <span style={{ marginLeft: 8 }}>({t('panel.component.legend.max', 'Max')}: {maxValue.toLocaleString()})</span>}
         </div>
       )}
     </div>

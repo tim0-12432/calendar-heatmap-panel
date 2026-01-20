@@ -14,8 +14,8 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    env:
-      GRAFANA_PLUGIN_ROOT_URLS: https://grafana.com
+    # env:
+    #   GRAFANA_PLUGIN_ROOT_URLS: https://grafana.com
     steps:
       - uses: actions/checkout@v6
         with:
