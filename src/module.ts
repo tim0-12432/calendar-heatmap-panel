@@ -29,6 +29,13 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
           ],
         },
       })
+      .addColorPicker({
+        path: 'emptyColor',
+        name: t('panel.options.emptyColor.name', 'Empty Color'),
+        description: t('panel.options.emptyColor.description', 'Color for days with value 0'),
+        defaultValue: 'rgba(0, 0, 0, 0.1)',
+        category: ['Colors'],
+      })
 
       // Layout settings
       .addBooleanSwitch({
@@ -113,6 +120,8 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
             { value: 'avg', label: t('panel.options.aggregation.options.avg', 'Average') },
             { value: 'max', label: t('panel.options.aggregation.options.max', 'Maximum') },
             { value: 'min', label: t('panel.options.aggregation.options.min', 'Minimum') },
+            { value: 'last', label: t('panel.options.aggregation.options.last', 'Last') },
+            { value: 'first', label: t('panel.options.aggregation.options.first', 'First') },
           ],
         },
       })

@@ -1,13 +1,18 @@
 import { DataFrame, FieldType, GrafanaTheme2 } from '@grafana/data';
 import { HeatmapValue } from '../types';
 
-type Aggregation = 'sum' | 'count' | 'avg' | 'max' | 'min';
+type Aggregation = 'sum' | 'count' | 'avg' | 'max' | 'min' | 'last' | 'first';
+
+interface TimestampedValue {
+  timestamp: number;
+  value: number;
+}
 
 export function processTimeSeriesData(
   series: DataFrame[],
   aggregation: Aggregation
 ): HeatmapValue[] {
-  const dailyData = new Map<string, number[]>();
+  const dailyData = new Map<string, TimestampedValue[]>();
 
   // Iterate through all data frames
   for (const frame of series) {
@@ -34,7 +39,7 @@ export function processTimeSeriesData(
       if (!dailyData.has(date)) {
         dailyData.set(date, []);
       }
-      dailyData.get(date)!.push(value);
+      dailyData.get(date)!.push({ timestamp, value });
     }
   }
 
@@ -52,24 +57,30 @@ export function processTimeSeriesData(
   return result;
 }
 
-function aggregate(values: number[], method: Aggregation): number {
+function aggregate(values: TimestampedValue[], method: Aggregation): number {
   if (values.length === 0) {
     return 0;
   }
 
   switch (method) {
     case 'sum':
-      return values.reduce((a, b) => a + b, 0);
+      return values.reduce((a, b) => a + b.value, 0);
     case 'count':
       return values.length;
     case 'avg':
-      return values.reduce((a, b) => a + b, 0) / values.length;
+      return values.reduce((a, b) => a + b.value, 0) / values.length;
     case 'max':
-      return Math.max(...values);
+      return Math.max(...values.map(v => v.value));
     case 'min':
-      return Math.min(...values);
+      return Math.min(...values.map(v => v.value));
+    case 'last':
+      // Sort by timestamp descending and return the last (most recent) value
+      return values.sort((a, b) => b.timestamp - a.timestamp)[0].value;
+    case 'first':
+      // Sort by timestamp ascending and return the first (earliest) value
+      return values.sort((a, b) => a.timestamp - b.timestamp)[0].value;
     default:
-      return values.reduce((a, b) => a + b, 0);
+      return values.reduce((a, b) => a + b.value, 0);
   }
 }
 
@@ -83,9 +94,10 @@ function formatDate(date: Date): string {
 export function getColorPalette(
   scheme: string,
   theme: GrafanaTheme2,
-  maxCount: number
+  maxCount: number,
+  emptyColor?: string
 ): Record<number, string> {
-  const emptyColor = theme.colors.background.canvas;
+  const defaultEmptyColor = emptyColor || theme.colors.background.canvas;
   const supportedSchemes = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple']);
   const hue = supportedSchemes.has(scheme) ? scheme : 'green';
 
@@ -104,8 +116,8 @@ export function getColorPalette(
   }
 
   const palette: Record<number, string> = {
-    0: emptyColor,
-    [emptyUpperBound]: emptyColor,
+    0: defaultEmptyColor,
+    [emptyUpperBound]: defaultEmptyColor,
   };
 
   let prev = emptyUpperBound;
