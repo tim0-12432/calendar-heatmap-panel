@@ -19,28 +19,12 @@ export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
     return processTimeSeriesData(data.series, options.aggregation, timeZone);
   }, [data.series, options.aggregation, timeZone]);
 
-
-
   // Calculate date range from Grafana time picker
   const fromMs = timeRange.from.valueOf();
   const toMs = timeRange.to.valueOf();
 
   const startDate = useMemo(() => new Date(fromMs), [fromMs]);
   const endDate = useMemo(() => new Date(toMs), [toMs]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   const availableWidth = useMemo(() => Math.max(0, width - 32), [width]);
 

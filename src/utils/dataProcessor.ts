@@ -26,7 +26,7 @@ export function processTimeSeriesData(
         continue;
       }
 
-      // 关键：按 Grafana 的 timeZone 去格式化日期（决定归属哪一天）
+      // Important: format dates using Grafana's timezone to ensure correct bucketing
       const date = dateTimeFormat(dateTime(timestamp), {
         format: 'YYYY/MM/DD',
         timeZone,
@@ -48,11 +48,6 @@ export function processTimeSeriesData(
   result.sort((a, b) => a.date.localeCompare(b.date));
   return result;
 }
-
-
-
-
-
 
 function aggregate(values: number[], method: Aggregation): number {
   if (values.length === 0) {
