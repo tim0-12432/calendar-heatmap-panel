@@ -58,8 +58,8 @@ export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
 
   // Get color palette based on selected scheme
   const colors = useMemo(() => {
-    return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor);
-  }, [options.colorScheme, theme, maxValue, options.emptyColor]);
+    return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor, options.customColor);
+  }, [options, theme, maxValue]);
 
   // Styles
   const styles = useMemo(

@@ -79,11 +79,95 @@ function aggregate(values: TimestampedValue[], method: Aggregation): number {
   }
 }
 
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}/${month}/${day}`;
+}
+
+// --------------------
+// Custom color helpers
+// --------------------
+type RGB = { r: number; g: number; b: number };
+
+function clampByte(n: number): number {
+  return Math.max(0, Math.min(255, Math.round(n)));
+}
+
+function parseColorToRgb(input: string): RGB | null {
+  const s = (input ?? '').trim();
+
+  // #RGB / #RRGGBB
+  const hex = s.replace(/^#/, '');
+  if (/^[0-9a-fA-F]{3}$/.test(hex)) {
+    return {
+      r: parseInt(hex[0] + hex[0], 16),
+      g: parseInt(hex[1] + hex[1], 16),
+      b: parseInt(hex[2] + hex[2], 16),
+    };
+  }
+  if (/^[0-9a-fA-F]{6}$/.test(hex)) {
+    return {
+      r: parseInt(hex.slice(0, 2), 16),
+      g: parseInt(hex.slice(2, 4), 16),
+      b: parseInt(hex.slice(4, 6), 16),
+    };
+  }
+
+  // rgb() / rgba()
+  // - Allow spaces
+  // - Accept alpha but ignore it (heatmap expects solid fills anyway)
+  const m = s.match(
+    /^rgba?\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})(?:\s*,\s*(\d+(\.\d+)?|\.\d+))?\s*\)$/
+  );
+  if (m) {
+    return {
+      r: clampByte(Number(m[1])),
+      g: clampByte(Number(m[2])),
+      b: clampByte(Number(m[3])),
+    };
+  }
+
+  return null;
+}
+
+function rgbToCss({ r, g, b }: RGB): string {
+  return `rgb(${clampByte(r)}, ${clampByte(g)}, ${clampByte(b)})`;
+}
+
+function mix(a: RGB, b: RGB, t: number): RGB {
+  return {
+    r: a.r + (b.r - a.r) * t,
+    g: a.g + (b.g - a.g) * t,
+    b: a.b + (b.b - a.b) * t,
+  };
+}
+
+function buildCustomLevels(base: RGB, theme: GrafanaTheme2): string[] {
+  const white: RGB = { r: 255, g: 255, b: 255 };
+  const black: RGB = { r: 0, g: 0, b: 0 };
+
+  // 4 levels to match existing legend stability:
+  // super-light, light, semi-dark, dark
+  const levels = [
+    rgbToCss(mix(base, white, 0.7)),
+    rgbToCss(mix(base, white, 0.45)),
+    rgbToCss(mix(base, black, 0.15)),
+    rgbToCss(mix(base, black, 0.35)),
+  ];
+
+  // Keep behavior aligned with existing logic:
+  // reverse in dark mode for perceived contrast
+  return theme.isDark ? [...levels].reverse() : levels;
+}
+
 export function getColorPalette(
   scheme: string,
   theme: GrafanaTheme2,
   maxCount: number,
-  emptyColor?: string
+  emptyColor?: string,
+  customColor?: string
 ): Record<number, string> {
   const defaultEmptyColor = emptyColor || theme.colors.background.canvas;
   const supportedSchemes = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple']);
@@ -98,9 +182,28 @@ export function getColorPalette(
   // We generate strictly increasing *exclusive upper bounds* for the 4 shade buckets.
   const safeMax = Number.isFinite(maxCount) ? Math.max(0, Math.ceil(maxCount)) : 0;
   const shadeQuantiles = [0.25, 0.5, 0.75, 1];
-  let shades = ['super-light', 'light', 'semi-dark', 'dark'];
-  if (theme.isDark) {
-    shades = Array.from(shades).reverse();
+
+  // Choose 4 colors (either built-in or derived from customColor)
+  let colorLevels: string[] | null = null;
+
+  if (scheme === 'custom') {
+    const rgb = parseColorToRgb(customColor ?? '');
+    if (rgb) {
+      colorLevels = buildCustomLevels(rgb, theme);
+    }
+  }
+
+  if (!colorLevels) {
+    // Fallback to built-in theme colors
+    const supportedSchemes = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple']);
+    const hue = supportedSchemes.has(scheme) ? scheme : 'green';
+
+    let shades = ['super-light', 'light', 'semi-dark', 'dark'];
+    if (theme.isDark) {
+      shades = Array.from(shades).reverse();
+    }
+
+    colorLevels = shades.map((shade) => theme.visualization.getColorByName(`${shade}-${hue}`));
   }
 
   const palette: Record<number, string> = {
@@ -113,7 +216,7 @@ export function getColorPalette(
     // desired is (inclusive cutoff) + 1 to make it an exclusive upper bound
     const desired = Math.round(safeMax * shadeQuantiles[i]) + 1;
     const bound = Math.max(prev + 1, Math.max(2, desired));
-    palette[bound] = theme.visualization.getColorByName(`${shades[i]}-${hue}`);
+    palette[bound] = colorLevels[i];
     prev = bound;
   }
 

@@ -25,8 +25,20 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
               { value: 'yellow', label: t('panel.options.colorScheme.options.yellow', 'Yellow') },
               { value: 'purple', label: t('panel.options.colorScheme.options.purple', 'Purple') },
               { value: 'orange', label: t('panel.options.colorScheme.options.orange', 'Orange') },
+              { value: 'custom', label: t('panel.options.colorScheme.options.custom', 'Custom') },
             ],
           },
+        })
+        .addTextInput({
+          path: 'customColor',
+          name: t('panel.options.customColor.name', 'Custom color'),
+          description: t(
+            'panel.options.customColor.description',
+            'Hex (#RGB/#RRGGBB) or rgb()/rgba(), e.g. #22c55e or rgb(34,197,94)'
+          ),
+          defaultValue: '#22c55e',
+          category: ['Colors'],
+          showIf: (options) => options.colorScheme === 'custom',
         })
         .addColorPicker({
           path: 'emptyColor',
