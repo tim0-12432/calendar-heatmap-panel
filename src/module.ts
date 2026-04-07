@@ -8,32 +8,32 @@ await initPluginTranslations(pluginJson.id);
 
 export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPanel)
   .setPanelOptions((builder) => {
-    return builder
-      // Color settings
-      .addSelect({
-        path: 'colorScheme',
-        name: t('panel.options.colorScheme.name', 'Color Scheme'),
-        description: t('panel.options.colorScheme.description', 'Color palette for the heatmap'),
-        defaultValue: 'green',
-        category: ['Colors'],
-        settings: {
-          options: [
-            { value: 'green', label: t('panel.options.colorScheme.options.green', 'Green') },
-            { value: 'blue', label: t('panel.options.colorScheme.options.blue', 'Blue') },
-            { value: 'red', label: t('panel.options.colorScheme.options.red', 'Red') },
-            { value: 'yellow', label: t('panel.options.colorScheme.options.yellow', 'Yellow') },
-            { value: 'purple', label: t('panel.options.colorScheme.options.purple', 'Purple') },
-            { value: 'orange', label: t('panel.options.colorScheme.options.orange', 'Orange') },
-          ],
-        },
-      })
-      .addColorPicker({
-        path: 'emptyColor',
-        name: t('panel.options.emptyColor.name', 'Empty Color'),
-        description: t('panel.options.emptyColor.description', 'Color for days with value 0'),
-        defaultValue: 'rgba(0, 0, 0, 0.1)',
-        category: ['Colors'],
-      })
+    return (
+      builder
+        // Color settings
+        .addSelect({
+          path: 'colorScheme',
+          name: t('panel.options.colorScheme.name', 'Color Scheme'),
+          description: t('panel.options.colorScheme.description', 'Color palette for the heatmap'),
+          defaultValue: 'green',
+          category: ['Colors'],
+          settings: {
+            options: [
+              { value: 'green', label: t('panel.options.colorScheme.options.green', 'Green') },
+              { value: 'blue', label: t('panel.options.colorScheme.options.blue', 'Blue') },
+              { value: 'red', label: t('panel.options.colorScheme.options.red', 'Red') },
+              { value: 'yellow', label: t('panel.options.colorScheme.options.yellow', 'Yellow') },
+              { value: 'purple', label: t('panel.options.colorScheme.options.purple', 'Purple') },
+              { value: 'orange', label: t('panel.options.colorScheme.options.orange', 'Orange') },
+            ],
+          },
+        })
+        .addColorPicker({
+          path: 'emptyColor',
+          name: t('panel.options.emptyColor.name', 'Empty Color'),
+          description: t('panel.options.emptyColor.description', 'Color for days with value 0'),
+          category: ['Colors'],
+        })
 
         // Layout settings
         .addBooleanSwitch({
@@ -104,25 +104,28 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           category: ['Labels'],
         })
 
-      // Data settings
-      .addSelect({
-        path: 'aggregation',
-        name: t('panel.options.aggregation.name', 'Aggregation'),
-        description: t('panel.options.aggregation.description', 'How to aggregate multiple data points on the same day'),
-        defaultValue: 'sum',
-        category: ['Data'],
-        settings: {
-          options: [
-            { value: 'sum', label: t('panel.options.aggregation.options.sum', 'Sum') },
-            { value: 'count', label: t('panel.options.aggregation.options.count', 'Count') },
-            { value: 'avg', label: t('panel.options.aggregation.options.avg', 'Average') },
-            { value: 'max', label: t('panel.options.aggregation.options.max', 'Maximum') },
-            { value: 'min', label: t('panel.options.aggregation.options.min', 'Minimum') },
-            { value: 'last', label: t('panel.options.aggregation.options.last', 'Last') },
-            { value: 'first', label: t('panel.options.aggregation.options.first', 'First') },
-          ],
-        },
-      })
+        // Data settings
+        .addSelect({
+          path: 'aggregation',
+          name: t('panel.options.aggregation.name', 'Aggregation'),
+          description: t(
+            'panel.options.aggregation.description',
+            'How to aggregate multiple data points on the same day'
+          ),
+          defaultValue: 'sum',
+          category: ['Data'],
+          settings: {
+            options: [
+              { value: 'sum', label: t('panel.options.aggregation.options.sum', 'Sum') },
+              { value: 'count', label: t('panel.options.aggregation.options.count', 'Count') },
+              { value: 'avg', label: t('panel.options.aggregation.options.avg', 'Average') },
+              { value: 'max', label: t('panel.options.aggregation.options.max', 'Maximum') },
+              { value: 'min', label: t('panel.options.aggregation.options.min', 'Minimum') },
+              { value: 'last', label: t('panel.options.aggregation.options.last', 'Last') },
+              { value: 'first', label: t('panel.options.aggregation.options.first', 'First') },
+            ],
+          },
+        })
 
         // Interaction
         .addBooleanSwitch({

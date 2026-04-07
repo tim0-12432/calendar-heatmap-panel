@@ -44,7 +44,9 @@
           "count": "Cuenta",
           "max": "Máximo",
           "min": "Mínimo",
-          "sum": "Suma"
+          "sum": "Suma",
+          "first": "Primero",
+          "last": "Último"
         }
       },
       "autoRectSize": {
@@ -90,6 +92,10 @@
       "space": {
         "description": "Espacio entre celdas en píxeles",
         "name": "Espacio"
+      },
+      "emptyColor": {
+        "description": "Color para los días con valor 0",
+        "name": "Color vacío"
       }
     }
   }
