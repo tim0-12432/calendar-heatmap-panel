@@ -10,7 +10,7 @@ import { t } from '@grafana/i18n';
 interface Props extends PanelProps<CalendarHeatmapOptions> {}
 
 export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
-  const { data, width, height, options, timeRange, timeZone } = props;
+  const { data, width, height, options, timeRange, timeZone, title } = props;
 
   const theme = useTheme2();
 
@@ -62,24 +62,26 @@ export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
   }, [options.colorScheme, theme, maxValue]);
 
   // Styles
-  const styles = {
+  const styles = useMemo(() => ({
     container: css`
       width: 100%;
       height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      // justify-content: center;
-      justify-content: flex-start;
+      justify-content: center;
       overflow: auto;
       padding: 16px;
+      /* Remove top padding if title is shown to reduce unnecessary spacing */
+      ${title && 'padding-top: 0;'}
     `,
     heatmap: css`
-      /* 关于热力图上面的空白，轻微上移：建议从 6~12px 试 */
-      margin-top: -20px;
-      
       /* @uiw/react-heat-map sets inline color: var(--rhm-text-color, ...) */
       --rhm-text-color: ${theme.colors.text.secondary};
+
+      /* Ensure heatmap fills the container */
+      width: 100%;
+      height: 100%;
 
       /* Weekday labels */
       .w-heatmap-week {
@@ -112,7 +114,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
       color: ${theme.colors.text.secondary};
       font-size: 14px;
     `,
-  };
+  }), [theme, options, title]);
 
   // Handle empty data
   if (data.series.length === 0) {
@@ -124,9 +126,6 @@ export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
     );
   }
 
-  /* legend 隐藏时，不要预留固定高度。而且显示legend时，legend下面的留白 */
-  const legendOffset = options.showLegend ? 10 : 0;
-
   return (
     <div className={styles.container}>
       <HeatMap
@@ -134,12 +133,10 @@ export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
         value={heatmapData}
         startDate={startDate}
         endDate={endDate}
-        width={availableWidth}
-        height={Math.max(0, height - legendOffset)}
         rectSize={computedRectSize}
         space={options.space}
         radius={options.radius}
-        legendCellSize={0}
+        legendCellSize={0} // We'll render custom legend
         weekLabels={options.showWeekLabels ? [
           t('panel.component.weekLabels.sun', 'Sun'),
           t('panel.component.weekLabels.mon', 'Mon'),
