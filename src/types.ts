@@ -2,8 +2,6 @@ export interface CalendarHeatmapOptions {
   // Colors
   colorScheme: 'green' | 'blue' | 'red' | 'yellow' | 'purple' | 'orange' | 'custom';
   emptyColor: string;
-
-  // NEW: custom base color string (hex / rgb / rgba)
   customColor: string;
 
   // Layout
@@ -22,4 +20,9 @@ export interface CalendarHeatmapOptions {
 
   // Interaction
   showTooltip: boolean;
+}
+
+export interface HeatmapValue {
+  date: string;
+  count: number;
 }

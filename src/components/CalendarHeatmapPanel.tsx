@@ -3,7 +3,8 @@ import { PanelProps } from '@grafana/data';
 import { useTheme2, Tooltip } from '@grafana/ui';
 import HeatMap from '@uiw/react-heat-map';
 import { CalendarHeatmapOptions } from '../types';
-import { processTimeSeriesData, getColorPalette } from '../utils/dataProcessor';
+import { processTimeSeriesData } from '../utils/dataProcessor';
+import { getColorPalette } from '../utils/colorHelpers';
 import { css } from '@emotion/css';
 import { t } from '@grafana/i18n';
 

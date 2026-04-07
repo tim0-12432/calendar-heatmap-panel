@@ -62,7 +62,8 @@
           "orange": "Orange",
           "purple": "Purple",
           "red": "Red",
-          "yellow": "Yellow"
+          "yellow": "Yellow",
+          "custom": "Custom"
         }
       },
       "radius": {
@@ -96,6 +97,10 @@
       "emptyColor": {
         "description": "Color for days with value 0",
         "name": "Empty Color"
+      },
+      "customColor": {
+        "description": "Base color for custom palette (other colors will be derived from this)",
+        "name": "Custom Color Theme"
       }
     }
   }

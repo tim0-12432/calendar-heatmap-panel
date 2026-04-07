@@ -29,12 +29,12 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
             ],
           },
         })
-        .addTextInput({
+        .addColorPicker({
           path: 'customColor',
-          name: t('panel.options.customColor.name', 'Custom color'),
+          name: t('panel.options.customColor.name', 'Custom Color Theme'),
           description: t(
             'panel.options.customColor.description',
-            'Hex (#RGB/#RRGGBB) or rgb()/rgba(), e.g. #22c55e or rgb(34,197,94)'
+            'Base color for custom palette (other colors will be derived from this)'
           ),
           defaultValue: '#22c55e',
           category: ['Colors'],
