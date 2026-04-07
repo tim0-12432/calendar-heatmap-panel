@@ -1,26 +1,23 @@
-import { DataFrame, FieldType, GrafanaTheme2 } from '@grafana/data';
+import { DataFrame, FieldType, GrafanaTheme2, dateTime, dateTimeFormat } from '@grafana/data';
 import { HeatmapValue } from '../types';
 
 type Aggregation = 'sum' | 'count' | 'avg' | 'max' | 'min';
 
 export function processTimeSeriesData(
   series: DataFrame[],
-  aggregation: Aggregation
+  aggregation: Aggregation,
+  timeZone?: string
 ): HeatmapValue[] {
   const dailyData = new Map<string, number[]>();
 
-  // Iterate through all data frames
   for (const frame of series) {
-    const timeField = frame.fields.find(f => f.type === FieldType.time);
-    const valueField = frame.fields.find(
-      f => f.type === FieldType.number && f.name !== 'Time'
-    );
+    const timeField = frame.fields.find((f) => f.type === FieldType.time);
+    const valueField = frame.fields.find((f) => f.type === FieldType.number && f.name !== 'Time');
 
     if (!timeField || !valueField) {
       continue;
     }
 
-    // Group values by date
     for (let i = 0; i < frame.length; i++) {
       const timestamp = timeField.values[i];
       const value = valueField.values[i];
@@ -29,7 +26,11 @@ export function processTimeSeriesData(
         continue;
       }
 
-      const date = formatDate(new Date(timestamp));
+      // 关键：按 Grafana 的 timeZone 去格式化日期（决定归属哪一天）
+      const date = dateTimeFormat(dateTime(timestamp), {
+        format: 'YYYY/MM/DD',
+        timeZone,
+      });
 
       if (!dailyData.has(date)) {
         dailyData.set(date, []);
@@ -38,19 +39,20 @@ export function processTimeSeriesData(
     }
   }
 
-  // Apply aggregation
   const result: HeatmapValue[] = [];
-
   dailyData.forEach((values, date) => {
     const count = aggregate(values, aggregation);
     result.push({ date, count: Math.round(count * 100) / 100 });
   });
 
-  // Sort by date
   result.sort((a, b) => a.date.localeCompare(b.date));
-
   return result;
 }
+
+
+
+
+
 
 function aggregate(values: number[], method: Aggregation): number {
   if (values.length === 0) {
@@ -73,18 +75,7 @@ function aggregate(values: number[], method: Aggregation): number {
   }
 }
 
-function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}/${month}/${day}`;
-}
-
-export function getColorPalette(
-  scheme: string,
-  theme: GrafanaTheme2,
-  maxCount: number
-): Record<number, string> {
+export function getColorPalette(scheme: string, theme: GrafanaTheme2, maxCount: number): Record<number, string> {
   const emptyColor = theme.colors.background.canvas;
   const supportedSchemes = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple']);
   const hue = supportedSchemes.has(scheme) ? scheme : 'green';

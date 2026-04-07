@@ -9,23 +9,38 @@ import { t } from '@grafana/i18n';
 
 interface Props extends PanelProps<CalendarHeatmapOptions> {}
 
-export const CalendarHeatmapPanel: React.FC<Props> = ({
-  data,
-  width,
-  height,
-  options,
-  timeRange,
-}) => {
+export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
+  const { data, width, height, options, timeRange, timeZone } = props;
+
   const theme = useTheme2();
 
   // Process data from Grafana data source
   const heatmapData = useMemo(() => {
-    return processTimeSeriesData(data.series, options.aggregation);
-  }, [data.series, options.aggregation]);
+    return processTimeSeriesData(data.series, options.aggregation, timeZone);
+  }, [data.series, options.aggregation, timeZone]);
+
+
 
   // Calculate date range from Grafana time picker
-  const startDate = useMemo(() => new Date(timeRange.from.valueOf()), [timeRange.from]);
-  const endDate = useMemo(() => new Date(timeRange.to.valueOf()), [timeRange.to]);
+  const fromMs = timeRange.from.valueOf();
+  const toMs = timeRange.to.valueOf();
+
+  const startDate = useMemo(() => new Date(fromMs), [fromMs]);
+  const endDate = useMemo(() => new Date(toMs), [toMs]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const availableWidth = useMemo(() => Math.max(0, width - 32), [width]);
 

@@ -41,52 +41,29 @@
       },
       "targets": [
         {
-          "csvWave": [
-            {
-              "timeStep": 78000,
-              "valuesCSV": "0,0,2,2,1,1"
-            }
-          ],
           "datasource": {
             "type": "grafana-testdata-datasource",
-            "uid": "db84e60d-b92a-4089-82cb-34842fb1754b"
+            "uid": "trlxrdZVk"
           },
           "refId": "A",
-          "scenarioId": "predictable_csv_wave"
+          "scenarioId": "csv_content",
+          "csvContent": "time,value\n2026-02-28T00:30:00Z,1\n2026-02-28T16:30:00Z,2\n2026-02-28T23:30:00Z,3\n2026-02-27T00:30:00Z,4\n2026-02-27T16:30:00Z,5\n2026-02-27T23:30:00Z,6\n2026-02-26T00:30:00Z,7\n2026-02-26T16:30:00Z,8\n2026-02-26T23:30:00Z,9"
         }
       ],
-      "title": "Sample Panel Title",
-      "type": "tim012432-calendarheatmap-panel"
-    },
-    {
-      "datasource": {
-        "type": "grafana-testdata-datasource",
-        "uid": "trlxrdZVk"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 2,
-      "options": {
-        "seriesCountSize": "sm",
-        "showSeriesCount": false,
-        "text": "Default value of text input option"
-      },
-      "targets": [
+      "title": "Calendar Heatmap Panel (Timezone test)",
+      "transformations": [
         {
-          "alias": "",
-          "datasource": {
-            "type": "grafana-testdata-datasource",
-            "uid": "db84e60d-b92a-4089-82cb-34842fb1754b"
-          },
-          "refId": "A",
-          "scenarioId": "no_data_points"
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "time",
+                "targetField": "time"
+              }
+            ]
+          }
         }
       ],
-      "title": "Sample Panel Title",
       "type": "tim012432-calendarheatmap-panel"
     }
   ],
@@ -97,13 +74,13 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
-    "to": "now"
+    "from": "2026-02-25T00:00:00Z",
+    "to": "2026-03-02T00:00:00Z"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Provisioned calendar-heatmap-panel dashboard",
+  "title": "Provisioned calendar-heatmap-panel dashboard (Timezone test)",
   "uid": "a538aeff-5a8a-42a5-901c-938d896fdd6f",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
