@@ -6,6 +6,7 @@
 [![Grafana](https://img.shields.io/badge/Grafana-11.6%2B-orange.svg)](https://grafana.com)
 [![Node](https://img.shields.io/badge/Node-22%2B-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
+
 </div>
 
 ---
