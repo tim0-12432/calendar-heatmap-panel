@@ -69,11 +69,15 @@ export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      // justify-content: center;
+      justify-content: flex-start;
       overflow: auto;
       padding: 16px;
     `,
     heatmap: css`
+      /* 关于热力图上面的空白，轻微上移：建议从 6~12px 试 */
+      margin-top: -20px;
+      
       /* @uiw/react-heat-map sets inline color: var(--rhm-text-color, ...) */
       --rhm-text-color: ${theme.colors.text.secondary};
 
@@ -112,12 +116,16 @@ export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
 
   // Handle empty data
   if (data.series.length === 0) {
+    
     return (
       <div className={styles.container}>
         <span className={styles.noData}>{t('panel.component.noData', 'No data available')}</span>
       </div>
     );
   }
+
+  /* legend 隐藏时，不要预留固定高度。而且显示legend时，legend下面的留白 */
+  const legendOffset = options.showLegend ? 10 : 0;
 
   return (
     <div className={styles.container}>
@@ -127,11 +135,11 @@ export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
         startDate={startDate}
         endDate={endDate}
         width={availableWidth}
-        height={height - 80}
+        height={Math.max(0, height - legendOffset)}
         rectSize={computedRectSize}
         space={options.space}
         radius={options.radius}
-        legendCellSize={0} // We'll render custom legend
+        legendCellSize={0}
         weekLabels={options.showWeekLabels ? [
           t('panel.component.weekLabels.sun', 'Sun'),
           t('panel.component.weekLabels.mon', 'Mon'),
