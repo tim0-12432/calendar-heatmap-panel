@@ -9,5 +9,5 @@ export default defineConfig({
     defaultNS: pluginJson.id,
     functions: ['t', '*.t'],
     transComponents: ['Trans'],
-  }
+  },
 });

@@ -6,9 +6,7 @@ import pluginJson from './plugin.json';
 
 await initPluginTranslations(pluginJson.id);
 
-export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
-  CalendarHeatmapPanel
-)
+export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPanel)
   .setPanelOptions((builder) => {
     return builder
       // Color settings
@@ -37,74 +35,74 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
         category: ['Colors'],
       })
 
-      // Layout settings
-      .addBooleanSwitch({
-        path: 'autoRectSize',
-        name: t('panel.options.autoRectSize.name', 'Auto Cell Size'),
-        description: t('panel.options.autoRectSize.description', 'Automatically fit cells to the panel width'),
-        defaultValue: true,
-        category: ['Layout'],
-      })
-      .addSliderInput({
-        path: 'rectSize',
-        name: t('panel.options.rectSize.name', 'Cell Size'),
-        description: t('panel.options.rectSize.description', 'Size of each day cell in pixels'),
-        defaultValue: 11,
-        category: ['Layout'],
-        settings: {
-          min: 8,
-          max: 20,
-          step: 1,
-        },
-        showIf: (options) => !options.autoRectSize,
-      })
-      .addSliderInput({
-        path: 'space',
-        name: t('panel.options.space.name', 'Cell Spacing'),
-        description: t('panel.options.space.description', 'Space between cells in pixels'),
-        defaultValue: 3,
-        category: ['Layout'],
-        settings: {
-          min: 1,
-          max: 24,
-          step: 1,
-        },
-      })
-      .addSliderInput({
-        path: 'radius',
-        name: t('panel.options.radius.name', 'Corner Radius'),
-        description: t('panel.options.radius.description', 'Border radius of cells'),
-        defaultValue: 2,
-        category: ['Layout'],
-        settings: {
-          min: 0,
-          max: 6,
-          step: 1,
-        },
-      })
+        // Layout settings
+        .addBooleanSwitch({
+          path: 'autoRectSize',
+          name: t('panel.options.autoRectSize.name', 'Auto Cell Size'),
+          description: t('panel.options.autoRectSize.description', 'Automatically fit cells to the panel width'),
+          defaultValue: true,
+          category: ['Layout'],
+        })
+        .addSliderInput({
+          path: 'rectSize',
+          name: t('panel.options.rectSize.name', 'Cell Size'),
+          description: t('panel.options.rectSize.description', 'Size of each day cell in pixels'),
+          defaultValue: 11,
+          category: ['Layout'],
+          settings: {
+            min: 8,
+            max: 20,
+            step: 1,
+          },
+          showIf: (options) => !options.autoRectSize,
+        })
+        .addSliderInput({
+          path: 'space',
+          name: t('panel.options.space.name', 'Cell Spacing'),
+          description: t('panel.options.space.description', 'Space between cells in pixels'),
+          defaultValue: 3,
+          category: ['Layout'],
+          settings: {
+            min: 1,
+            max: 24,
+            step: 1,
+          },
+        })
+        .addSliderInput({
+          path: 'radius',
+          name: t('panel.options.radius.name', 'Corner Radius'),
+          description: t('panel.options.radius.description', 'Border radius of cells'),
+          defaultValue: 2,
+          category: ['Layout'],
+          settings: {
+            min: 0,
+            max: 6,
+            step: 1,
+          },
+        })
 
-      // Label settings
-      .addBooleanSwitch({
-        path: 'showWeekLabels',
-        name: t('panel.options.showWeekLabels.name', 'Show Week Labels'),
-        description: t('panel.options.showWeekLabels.description', 'Display day of week labels'),
-        defaultValue: true,
-        category: ['Labels'],
-      })
-      .addBooleanSwitch({
-        path: 'showMonthLabels',
-        name: t('panel.options.showMonthLabels.name', 'Show Month Labels'),
-        description: t('panel.options.showMonthLabels.description', 'Display month labels'),
-        defaultValue: true,
-        category: ['Labels'],
-      })
-      .addBooleanSwitch({
-        path: 'showLegend',
-        name: t('panel.options.showLegend.name', 'Show Legend'),
-        description: t('panel.options.showLegend.description', 'Display color legend'),
-        defaultValue: true,
-        category: ['Labels'],
-      })
+        // Label settings
+        .addBooleanSwitch({
+          path: 'showWeekLabels',
+          name: t('panel.options.showWeekLabels.name', 'Show Week Labels'),
+          description: t('panel.options.showWeekLabels.description', 'Display day of week labels'),
+          defaultValue: true,
+          category: ['Labels'],
+        })
+        .addBooleanSwitch({
+          path: 'showMonthLabels',
+          name: t('panel.options.showMonthLabels.name', 'Show Month Labels'),
+          description: t('panel.options.showMonthLabels.description', 'Display month labels'),
+          defaultValue: true,
+          category: ['Labels'],
+        })
+        .addBooleanSwitch({
+          path: 'showLegend',
+          name: t('panel.options.showLegend.name', 'Show Legend'),
+          description: t('panel.options.showLegend.description', 'Display color legend'),
+          defaultValue: true,
+          category: ['Labels'],
+        })
 
       // Data settings
       .addSelect({
@@ -126,13 +124,14 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(
         },
       })
 
-      // Interaction
-      .addBooleanSwitch({
-        path: 'showTooltip',
-        name: t('panel.options.showTooltip.name', 'Show Tooltip'),
-        description: t('panel.options.showTooltip.description', 'Show tooltip on hover'),
-        defaultValue: true,
-        category: ['Interaction'],
-      });
+        // Interaction
+        .addBooleanSwitch({
+          path: 'showTooltip',
+          name: t('panel.options.showTooltip.name', 'Show Tooltip'),
+          description: t('panel.options.showTooltip.description', 'Show tooltip on hover'),
+          defaultValue: true,
+          category: ['Interaction'],
+        })
+    );
   })
   .setNoPadding();
