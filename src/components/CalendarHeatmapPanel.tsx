@@ -9,23 +9,22 @@ import { t } from '@grafana/i18n';
 
 interface Props extends PanelProps<CalendarHeatmapOptions> {}
 
-export const CalendarHeatmapPanel: React.FC<Props> = ({
-  data,
-  width,
-  height,
-  options,
-  timeRange,
-}) => {
+export const CalendarHeatmapPanel: React.FC<Props> = (props) => {
+  const { data, width, options, timeRange, timeZone, title } = props;
+
   const theme = useTheme2();
 
   // Process data from Grafana data source
   const heatmapData = useMemo(() => {
-    return processTimeSeriesData(data.series, options.aggregation);
-  }, [data.series, options.aggregation]);
+    return processTimeSeriesData(data.series, options.aggregation, timeZone);
+  }, [data.series, options.aggregation, timeZone]);
 
   // Calculate date range from Grafana time picker
-  const startDate = useMemo(() => new Date(timeRange.from.valueOf()), [timeRange.from]);
-  const endDate = useMemo(() => new Date(timeRange.to.valueOf()), [timeRange.to]);
+  const fromMs = timeRange.from.valueOf();
+  const toMs = timeRange.to.valueOf();
+
+  const startDate = useMemo(() => new Date(fromMs), [fromMs]);
+  const endDate = useMemo(() => new Date(toMs), [toMs]);
 
   const availableWidth = useMemo(() => Math.max(0, width - 32), [width]);
 
@@ -52,64 +51,73 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({
   // Calculate max value for legend
   const maxValue = useMemo(() => {
     if (heatmapData.length === 0) {
-        return 0;
+      return 0;
     }
-    return Math.max(...heatmapData.map(d => d.count));
+    return Math.max(...heatmapData.map((d) => d.count));
   }, [heatmapData]);
 
   // Get color palette based on selected scheme
   const colors = useMemo(() => {
-    return getColorPalette(options.colorScheme, theme, maxValue, options.customColor);
-  }, [options.colorScheme, theme, maxValue, options.customColor]);
+    return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor, options.customColor);
+  }, [options, theme, maxValue]);
 
   // Styles
-  const styles = {
-    container: css`
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: auto;
-      padding: 16px;
-    `,
-    heatmap: css`
-      /* @uiw/react-heat-map sets inline color: var(--rhm-text-color, ...) */
-      --rhm-text-color: ${theme.colors.text.secondary};
+  const styles = useMemo(
+    () => ({
+      container: css`
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: auto;
+        padding: 16px;
+        /* Remove top padding if title is shown to reduce unnecessary spacing */
+        ${title && 'padding-top: 0;'}
+      `,
+      heatmap: css`
+        /* @uiw/react-heat-map sets inline color: var(--rhm-text-color, ...) */
+        --rhm-text-color: ${theme.colors.text.secondary};
 
-      /* Weekday labels */
-      .w-heatmap-week {
+        /* Ensure heatmap fills the container */
+        width: 100%;
+        height: 100%;
+
+        /* Weekday labels */
+        .w-heatmap-week {
+          font-size: 11px;
+          font-weight: 600;
+          fill: currentColor;
+        }
+
+        /* Month labels have no class, but include a data-size attribute */
+        text[data-size] {
+          font-size: 12px;
+          font-weight: 600;
+          fill: currentColor;
+        }
+      `,
+      legend: css`
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 12px;
         font-size: 11px;
-        font-weight: 600;
-        fill: currentColor;
-      }
-
-      /* Month labels have no class, but include a data-size attribute */
-      text[data-size] {
-        font-size: 12px;
-        font-weight: 600;
-        fill: currentColor;
-      }
-    `,
-    legend: css`
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 12px;
-      font-size: 11px;
-      color: ${theme.colors.text.secondary};
-    `,
-    legendRect: css`
-      width: 12px;
-      height: 12px;
-      border-radius: calc(${options.radius}px / 2);
-    `,
-    noData: css`
-      color: ${theme.colors.text.secondary};
-      font-size: 14px;
-    `,
-  };
+        color: ${theme.colors.text.secondary};
+      `,
+      legendRect: css`
+        width: 12px;
+        height: 12px;
+        border-radius: calc(${options.radius}px / 2);
+      `,
+      noData: css`
+        color: ${theme.colors.text.secondary};
+        font-size: 14px;
+      `,
+    }),
+    [theme, options, title]
+  );
 
   // Handle empty data
   if (data.series.length === 0) {
@@ -127,40 +135,47 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({
         value={heatmapData}
         startDate={startDate}
         endDate={endDate}
-        width={availableWidth}
-        height={height - 80}
         rectSize={computedRectSize}
         space={options.space}
         radius={options.radius}
         legendCellSize={0} // We'll render custom legend
-        weekLabels={options.showWeekLabels ? [
-          t('panel.component.weekLabels.sun', 'Sun'),
-          t('panel.component.weekLabels.mon', 'Mon'),
-          t('panel.component.weekLabels.tue', 'Tue'),
-          t('panel.component.weekLabels.wed', 'Wed'),
-          t('panel.component.weekLabels.thu', 'Thu'),
-          t('panel.component.weekLabels.fri', 'Fri'),
-          t('panel.component.weekLabels.sat', 'Sat'),
-        ] : false}
-        monthLabels={options.showMonthLabels ? [
-          t('panel.component.monthLabels.jan', 'Jan'),
-          t('panel.component.monthLabels.feb', 'Feb'),
-          t('panel.component.monthLabels.mar', 'Mar'),
-          t('panel.component.monthLabels.apr', 'Apr'),
-          t('panel.component.monthLabels.may', 'May'),
-          t('panel.component.monthLabels.jun', 'Jun'),
-          t('panel.component.monthLabels.jul', 'Jul'),
-          t('panel.component.monthLabels.aug', 'Aug'),
-          t('panel.component.monthLabels.sep', 'Sep'),
-          t('panel.component.monthLabels.oct', 'Oct'),
-          t('panel.component.monthLabels.nov', 'Nov'),
-          t('panel.component.monthLabels.dec', 'Dec'),
-        ] : false}
+        weekLabels={
+          options.showWeekLabels
+            ? [
+                t('panel.component.weekLabels.sun', 'Sun'),
+                t('panel.component.weekLabels.mon', 'Mon'),
+                t('panel.component.weekLabels.tue', 'Tue'),
+                t('panel.component.weekLabels.wed', 'Wed'),
+                t('panel.component.weekLabels.thu', 'Thu'),
+                t('panel.component.weekLabels.fri', 'Fri'),
+                t('panel.component.weekLabels.sat', 'Sat'),
+              ]
+            : false
+        }
+        monthLabels={
+          options.showMonthLabels
+            ? [
+                t('panel.component.monthLabels.jan', 'Jan'),
+                t('panel.component.monthLabels.feb', 'Feb'),
+                t('panel.component.monthLabels.mar', 'Mar'),
+                t('panel.component.monthLabels.apr', 'Apr'),
+                t('panel.component.monthLabels.may', 'May'),
+                t('panel.component.monthLabels.jun', 'Jun'),
+                t('panel.component.monthLabels.jul', 'Jul'),
+                t('panel.component.monthLabels.aug', 'Aug'),
+                t('panel.component.monthLabels.sep', 'Sep'),
+                t('panel.component.monthLabels.oct', 'Oct'),
+                t('panel.component.monthLabels.nov', 'Nov'),
+                t('panel.component.monthLabels.dec', 'Dec'),
+              ]
+            : false
+        }
         panelColors={colors}
         rectRender={(props, data) => {
-          const tooltipContent = data.count !== undefined 
-            ? `${data.date}: ${data.count.toLocaleString()}`
-            : `${data.date}: ${t('panel.component.tooltip.noData', 'No data')}`;
+          const tooltipContent =
+            data.count !== undefined
+              ? `${data.date}: ${data.count.toLocaleString()}`
+              : `${data.date}: ${t('panel.component.tooltip.noData', 'No data')}`;
 
           if (!options.showTooltip) {
             return <rect {...props} rx={options.radius} />;
@@ -182,15 +197,19 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({
             .filter(([key]) => !Number.isNaN(key) && key !== 1)
             .sort(([a], [b]) => a - b)
             .map(([key, color]) => (
-            <div
-              key={key}
-              className={styles.legendRect}
-              style={{ backgroundColor: color }}
-              title={t('panel.component.legend.tooltip', 'Level {{level}}', { level: key })}
-            />
+              <div
+                key={key}
+                className={styles.legendRect}
+                style={{ backgroundColor: color }}
+                title={t('panel.component.legend.tooltip', 'Level {{level}}', { level: key })}
+              />
             ))}
           <span>{t('panel.component.legend.more', 'More')}</span>
-          {maxValue > 0 && <span style={{ marginLeft: 8 }}>({t('panel.component.legend.max', 'Max')}: {maxValue.toLocaleString()})</span>}
+          {maxValue > 0 && (
+            <span style={{ marginLeft: 8 }}>
+              ({t('panel.component.legend.max', 'Max')}: {maxValue.toLocaleString()})
+            </span>
+          )}
         </div>
       )}
     </div>

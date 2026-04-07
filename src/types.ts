@@ -18,7 +18,7 @@ export interface CalendarHeatmapOptions {
   showLegend: boolean;
 
   // Data
-  aggregation: 'sum' | 'count' | 'avg' | 'max' | 'min';
+  aggregation: 'sum' | 'count' | 'avg' | 'max' | 'min' | 'last' | 'first';
 
   // Interaction
   showTooltip: boolean;

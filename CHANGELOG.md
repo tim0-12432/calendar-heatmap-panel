@@ -11,6 +11,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nothing yet.
 
+## [1.1.0] - 2026-04-xx
+
+### Added
+
+- **Last and First Aggregation** when multiple values per day
+
+### Changed
+
+- **Alignment and Spacing** of heatmap in panel
+
+### Fixed
+
+- **Timezone** aware bucket computing
+
+## [1.0.4] - 2026-01-20
+
+### Added
+
+- **Localizations** based on the set up language in Grafana
+
+### Changed
+
+- **Readme** to contain the logo as a header
+- **Dependency on Grafana 12**
+
+### Fixed
+
+- **Rectangle radius** is also applied when tooltip is active
+- **Reverse shading** is being used when set to dark mode
+
+## [1.0.3] - 2026-01-18
+
+### Changed
+
+- **Readme** to properly document what the plugin does
+
+## [1.0.1] - 2026-01-17
+
+### Added
+
+- **Testing** to ensure proper functionality
+
+### Fixed
+
+- **CI Pipeline**
+
 ## [1.0.0] - 2026-01-17
 
 ### Added
@@ -111,5 +157,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Lazy loading** of non-critical components to improve initial load times
 - **Memory-efficient** data structures preventing memory leaks in long-running dashboards
 
-[unreleased]: https://github.com/tim0-12432/calendar-heatmap-panel/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/tim0-12432/calendar-heatmap-panel/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/tim0-12432/calendar-heatmap-panel/releases/compare/v1.0.4...v1.1.0
+[1.0.4]: https://github.com/tim0-12432/calendar-heatmap-panel/releases/compare/v1.0.3...v1.0.4
+[1.0.3]: https://github.com/tim0-12432/calendar-heatmap-panel/releases/compare/v1.0.2...v1.0.3
+[1.0.2]: https://github.com/tim0-12432/calendar-heatmap-panel/releases/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/tim0-12432/calendar-heatmap-panel/releases/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/tim0-12432/calendar-heatmap-panel/releases/tag/v1.0.0
