@@ -1,7 +1,8 @@
 export interface CalendarHeatmapOptions {
   // Colors
-  colorScheme: 'green' | 'blue' | 'red' | 'yellow' | 'purple' | 'orange';
+  colorScheme: 'green' | 'blue' | 'red' | 'yellow' | 'purple' | 'orange' | 'custom';
   emptyColor: string;
+  customColor: string;
 
   // Layout
   autoRectSize: boolean;
@@ -30,7 +31,7 @@ export interface CalendarHeatmapOptions {
   weekLabelCustom: string; // comma-separated 7 labels
 
   // Data
-  aggregation: 'sum' | 'count' | 'avg' | 'max' | 'min';
+  aggregation: 'sum' | 'count' | 'avg' | 'max' | 'min' | 'last' | 'first';
 
   // Interaction
   showTooltip: boolean;

@@ -3,7 +3,8 @@ import { PanelProps } from '@grafana/data';
 import { useTheme2, Tooltip } from '@grafana/ui';
 import HeatMap from '@uiw/react-heat-map';
 import { CalendarHeatmapOptions, HeatmapValue } from '../types';
-import { processTimeSeriesData, getColorPalette } from '../utils/dataProcessor';
+import { processTimeSeriesData } from '../utils/dataProcessor';
+import { getColorPalette } from '../utils/colorHelpers';
 import { css } from '@emotion/css';
 import { t } from '@grafana/i18n';
 
@@ -54,12 +55,12 @@ function rotateWeek(labelsSunFirst: string[], weekStart: 'sunday' | 'monday'): s
     : labelsSunFirst; // Sun..Sat
 }
 
-export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, options, timeRange }) => {
+export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, options, timeRange, timeZone, title }) => {
   const theme = useTheme2();
 
   const heatmapData = useMemo(() => {
-    return processTimeSeriesData(data.series, options.aggregation);
-  }, [data.series, options.aggregation]);
+    return processTimeSeriesData(data.series, options.aggregation, timeZone);
+  }, [data.series, options.aggregation, timeZone]);
 
   const countByOriginalDate = useMemo(() => {
     const m = new Map<string, number>();
@@ -195,53 +196,66 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
   }, [heatmapData]);
 
   const colors = useMemo(() => {
-    return getColorPalette(options.colorScheme, theme, maxValue);
-  }, [options.colorScheme, theme, maxValue]);
+    return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor, options.customColor);
+  }, [options, theme, maxValue]);
 
-  const styles = {
-    container: css`
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: auto;
-      padding: 16px;
-    `,
-    heatmap: css`
-      --rhm-text-color: ${theme.colors.text.secondary};
+  // Styles
+  const styles = useMemo(
+    () => ({
+      container: css`
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: auto;
+        padding: 16px;
+        /* Remove top padding if title is shown to reduce unnecessary spacing */
+        ${title && 'padding-top: 0;'}
+      `,
+      heatmap: css`
+        /* @uiw/react-heat-map sets inline color: var(--rhm-text-color, ...) */
+        --rhm-text-color: ${theme.colors.text.secondary};
 
-      .w-heatmap-week {
+        /* Ensure heatmap fills the container */
+        width: 100%;
+        height: 100%;
+
+        /* Weekday labels */
+        .w-heatmap-week {
+          font-size: 11px;
+          font-weight: 600;
+          fill: currentColor;
+        }
+
+        /* Month labels have no class, but include a data-size attribute */
+        text[data-size] {
+          font-size: 12px;
+          font-weight: 600;
+          fill: currentColor;
+        }
+      `,
+      legend: css`
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 12px;
         font-size: 11px;
-        font-weight: 600;
-        fill: currentColor;
-      }
-
-      text[data-size] {
-        font-size: 12px;
-        font-weight: 600;
-        fill: currentColor;
-      }
-    `,
-    legend: css`
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 12px;
-      font-size: 11px;
-      color: ${theme.colors.text.secondary};
-    `,
-    legendRect: css`
-      width: 12px;
-      height: 12px;
-      border-radius: calc(${options.radius}px / 2);
-    `,
-    noData: css`
-      color: ${theme.colors.text.secondary};
-      font-size: 14px;
-    `,
-  };
+        color: ${theme.colors.text.secondary};
+      `,
+      legendRect: css`
+        width: 12px;
+        height: 12px;
+        border-radius: calc(${options.radius}px / 2);
+      `,
+      noData: css`
+        color: ${theme.colors.text.secondary};
+        font-size: 14px;
+      `,
+    }),
+    [theme, options, title]
+  );
 
   if (data.series.length === 0) {
     return (

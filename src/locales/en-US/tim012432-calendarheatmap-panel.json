@@ -44,7 +44,9 @@
           "count": "Count",
           "max": "Maximum",
           "min": "Minimum",
-          "sum": "Sum"
+          "sum": "Sum",
+          "first": "First",
+          "last": "Last"
         }
       },
       "autoRectSize": {
@@ -60,7 +62,8 @@
           "orange": "Orange",
           "purple": "Purple",
           "red": "Red",
-          "yellow": "Yellow"
+          "yellow": "Yellow",
+          "custom": "Custom"
         }
       },
       "radius": {
@@ -90,6 +93,14 @@
       "space": {
         "description": "Space between cells in pixels",
         "name": "Cell Spacing"
+      },
+      "emptyColor": {
+        "description": "Color for days with value 0",
+        "name": "Empty Color"
+      },
+      "customColor": {
+        "description": "Base color for custom palette (other colors will be derived from this)",
+        "name": "Custom Color Theme"
       }
     }
   }

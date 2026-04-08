@@ -44,7 +44,9 @@
           "count": "Cuenta",
           "max": "Máximo",
           "min": "Mínimo",
-          "sum": "Suma"
+          "sum": "Suma",
+          "first": "Primero",
+          "last": "Último"
         }
       },
       "autoRectSize": {
@@ -60,7 +62,8 @@
           "orange": "Naranja",
           "purple": "Púrpura",
           "red": "Rojo",
-          "yellow": "Amarillo"
+          "yellow": "Amarillo",
+          "custom": "Personalizado"
         }
       },
       "radius": {
@@ -90,6 +93,14 @@
       "space": {
         "description": "Espacio entre celdas en píxeles",
         "name": "Espacio"
+      },
+      "emptyColor": {
+        "description": "Color para los días con valor 0",
+        "name": "Color vacío"
+      },
+      "customColor": {
+        "description": "Color base para la paleta personalizada (otros colores se derivarán de este)",
+        "name": "Tema de Color Personalizado"
       }
     }
   }

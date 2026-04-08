@@ -44,7 +44,9 @@
           "count": "Anzahl",
           "max": "Maximum",
           "min": "Minimum",
-          "sum": "Summe"
+          "sum": "Summe",
+          "first": "Erster",
+          "last": "Letzter"
         }
       },
       "autoRectSize": {
@@ -60,7 +62,8 @@
           "orange": "Orange",
           "purple": "Lila",
           "red": "Rot",
-          "yellow": "Gelb"
+          "yellow": "Gelb",
+          "custom": "Benutzerdefiniert"
         }
       },
       "radius": {
@@ -90,6 +93,14 @@
       "space": {
         "description": "Abstand zwischen Zellen in Pixel",
         "name": "Zellenabstand"
+      },
+      "emptyColor": {
+        "description": "Farbe für Tage mit Wert 0",
+        "name": "Leere Farbe"
+      },
+      "customColor": {
+        "description": "Basis Farbe für eigenes Schema (andere Farben werden davon abgeleitet)",
+        "name": "Eigenes Farbschema"
       }
     }
   }
