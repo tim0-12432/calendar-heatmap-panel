@@ -1,8 +1,6 @@
 import { dateTime, dateTimeFormat } from '@grafana/data';
 import { HeatmapValue } from 'types';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 export function formatDate(date: Date, timeZone?: string): string {
   return dateTimeFormat(dateTime(date), {
     format: 'YYYY/MM/DD',
@@ -11,21 +9,16 @@ export function formatDate(date: Date, timeZone?: string): string {
 }
 
 function addDays(date: Date, days: number): Date {
-  return new Date(date.getTime() + days * DAY_MS);
+  return dateTime(date).add(days, 'day').toDate();
 }
 
 /** Parse either YYYY/MM/DD or YYYY-MM-DD */
 export function parseAnyYMD(dateStr: string): Date | null {
-  const s = String(dateStr).trim();
-  const parts = s.includes('/') ? s.split('/') : s.includes('-') ? s.split('-') : [];
-  if (parts.length !== 3) {
-    return null;
+  function tryParse(format: string): Date | null {
+    const dt = dateTime(dateStr.trim(), format);
+    return dt.isValid() ? dt.toDate() : null;
   }
-  const [y, m, d] = parts.map((x) => Number(x));
-  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) {
-    return null;
-  }
-  return new Date(y, m - 1, d);
+  return tryParse('YYYY/MM/DD') || tryParse('YYYY-MM-DD');
 }
 
 export function splitCsv(input: string): string[] {
@@ -52,12 +45,8 @@ function getRenderShiftDays(weekStart: 'saturday' | 'sunday' | 'monday'): number
 }
 
 export function reverseShift(weekStart: 'saturday' | 'sunday' | 'monday', date: string): Date {
-  let dt = parseAnyYMD(date);
-  if (!dt) {
-    dt = new Date(date);
-  }
-  const renderShiftDays = -1 * getRenderShiftDays(weekStart);
-  return addDays(dt, renderShiftDays);
+  const dt = parseAnyYMD(date) || dateTime(date).toDate();
+  return addDays(dt, -1 * getRenderShiftDays(weekStart));
 }
 
 export function shiftHeatMapData(
@@ -89,8 +78,9 @@ export function shiftDates(weekstart: 'saturday' | 'sunday' | 'monday', dates: D
 }
 
 export function getWeekCount(start: Date, end: Date): number {
-  const alignedStart = !start.getDay() ? start : new Date(start.getTime() - start.getDay() * DAY_MS);
-
-  const diffDays = Math.max(0, Math.floor((end.getTime() - alignedStart.getTime()) / DAY_MS));
-  return Math.max(1, Math.ceil((diffDays + 1) / 7));
+  const startDt = dateTime(start).startOf('week'); // Aligns to start of week
+  const endDt = dateTime(end);
+  // Get the difference in weeks and add 1 for inclusive count
+  const weeks = Math.max(0, endDt.diff(startDt, 'weeks'));
+  return Math.max(1, weeks + 1);
 }
