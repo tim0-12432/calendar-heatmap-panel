@@ -5,7 +5,15 @@ import HeatMap from '@uiw/react-heat-map';
 import { CalendarHeatmapOptions, HeatmapValue } from '../types';
 import { processTimeSeriesData } from '../utils/dataProcessor';
 import { getColorPalette } from '../utils/colorHelpers';
-import { shiftHeatMapData, splitCsv, shiftDates, rotateWeek, getWeekCount, formatDate, reverseShift } from '../utils/dateHelpers';
+import {
+  shiftHeatMapData,
+  splitCsv,
+  shiftDates,
+  rotateWeek,
+  getWeekCount,
+  formatDate,
+  reverseShift,
+} from '../utils/dateHelpers';
 import { css } from '@emotion/css';
 import { t } from '@grafana/i18n';
 
@@ -129,7 +137,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
 
   const colors = useMemo(() => {
     return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor, options.customColor);
-  }, [options, theme, maxValue]);
+  }, [options.colorScheme, options.emptyColor, options.customColor, theme, maxValue]);
 
   // Styles
   const styles = useMemo(
@@ -186,7 +194,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
         font-size: 14px;
       `,
     }),
-    [theme, options, title]
+    [theme, options.radius, title]
   );
 
   if (data.series.length === 0) {

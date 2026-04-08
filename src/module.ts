@@ -173,10 +173,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
         .addTextInput({
           path: 'weekLabelCustom',
           name: t('panel.options.weekLabelCustom.name', 'Custom Week Labels'),
-          description: t(
-            'panel.options.weekLabelCustom.description',
-            'Comma-separated 7 labels, e.g. Sun,Mon,...,Sat'
-          ),
+          description: t('panel.options.weekLabelCustom.description', 'Comma-separated 7 labels, e.g. Sun,Mon,...,Sat'),
           defaultValue: 'Sun,Mon,Tue,Wed,Thu,Fri,Sat',
           category: ['Labels'],
           showIf: (o) => o.showWeekLabels && o.weekLabelMode === 'custom',
