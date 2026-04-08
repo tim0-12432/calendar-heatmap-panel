@@ -101,6 +101,41 @@
       "customColor": {
         "description": "Base color for custom palette (other colors will be derived from this)",
         "name": "Custom Color Theme"
+      },
+      "monthLabelMode": {
+        "description": "How to render month labels",
+        "name": "Month Label Mode",
+        "options": {
+          "default": "Default",
+          "number": "Number",
+          "custom": "Custom"
+        }
+      },
+      "monthLabelCustom": {
+        "description": "Comma-separated 12 labels, e.g. Jan,Feb,...,Dec",
+        "name": "Custom Month Labels"
+      },
+      "weekLabelMode": {
+        "description": "How to render week day labels",
+        "name": "Week Label Mode",
+        "options": {
+          "default": "Default",
+          "number": "Number",
+          "custom": "Custom"
+        }
+      },
+      "weekLabelCustom": {
+        "description": "Comma-separated 7 labels, e.g. Sun,Mon,...,Sat",
+        "name": "Custom Week Labels"
+      },
+      "weekStart": {
+        "description": "Choose on which day the week starts",
+        "name": "Week Start Day",
+        "options": {
+          "saturday": "Saturday",
+          "sunday": "Sunday",
+          "monday": "Monday"
+        }
       }
     }
   }

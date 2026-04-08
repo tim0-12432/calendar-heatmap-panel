@@ -16,7 +16,7 @@ export interface CalendarHeatmapOptions {
   showLegend: boolean;
 
   // Week start
-  weekStart: 'sunday' | 'monday';
+  weekStart: 'saturday' | 'sunday' | 'monday';
 
   /**
    * Label display modes:
@@ -26,7 +26,6 @@ export interface CalendarHeatmapOptions {
    */
   monthLabelMode: 'default' | 'number' | 'custom';
   monthLabelCustom: string; // comma-separated 12 labels
-
   weekLabelMode: 'default' | 'number' | 'custom';
   weekLabelCustom: string; // comma-separated 7 labels
 
@@ -39,5 +38,6 @@ export interface CalendarHeatmapOptions {
 
 export interface HeatmapValue {
   date: string;
+  originalDate: string;
   count: number;
 }

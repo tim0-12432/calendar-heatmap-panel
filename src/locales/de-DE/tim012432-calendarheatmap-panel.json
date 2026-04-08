@@ -101,6 +101,41 @@
       "customColor": {
         "description": "Basis Farbe für eigenes Schema (andere Farben werden davon abgeleitet)",
         "name": "Eigenes Farbschema"
+      },
+      "monthLabelMode": {
+        "description": "Wie die Monatsbeschriftungen dargestellt werden",
+        "name": "Art der Monatsbeschriftung",
+        "options": {
+          "default": "Standard",
+          "number": "Zahl",
+          "custom": "Benutzerdefiniert"
+        }
+      },
+      "monthLabelCustom": {
+        "description": "Komma-separierte 12 Beschriftungen, z.B. Jan,Feb,...,Dez",
+        "name": "Eigene Monatsbeschriftungen"
+      },
+      "weekLabelMode": {
+        "description": "Wie die Wochentagsbeschriftungen dargestellt werden",
+        "name": "Art der Wochentagsbeschriftungen",
+        "options": {
+          "default": "Standard",
+          "number": "Zahl",
+          "custom": "Benutzerdefiniert"
+        }
+      },
+      "weekLabelCustom": {
+        "description": "Komma-separierte 7 Beschriftungen, z.B. So,Mo,...,Sa",
+        "name": "Eigene Wochentagsbeschriftungen"
+      },
+      "weekStart": {
+        "description": "Definiert wann die Woche beginnt",
+        "name": "Erster Tag der Woche",
+        "options": {
+          "saturday": "Samstag",
+          "sunday": "Sonntag",
+          "monday": "Montag"
+        }
       }
     }
   }

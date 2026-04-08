@@ -95,9 +95,9 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
 
         // Label settings
         .addBooleanSwitch({
-          path: 'showWeekLabels',
-          name: t('panel.options.showWeekLabels.name', 'Show Week Labels'),
-          description: t('panel.options.showWeekLabels.description', 'Display day of week labels'),
+          path: 'showLegend',
+          name: t('panel.options.showLegend.name', 'Show Legend'),
+          description: t('panel.options.showLegend.description', 'Display color legend'),
           defaultValue: true,
           category: ['Labels'],
         })
@@ -108,12 +108,78 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           defaultValue: true,
           category: ['Labels'],
         })
+        .addRadio({
+          path: 'monthLabelMode',
+          name: t('panel.options.monthLabelMode.name', 'Month Label Mode'),
+          description: t('panel.options.monthLabelMode.description', 'How to render month labels'),
+          defaultValue: 'default',
+          category: ['Labels'],
+          settings: {
+            options: [
+              { value: 'default', label: t('panel.options.monthLabelMode.options.default', 'Default') },
+              { value: 'number', label: t('panel.options.monthLabelMode.options.number', 'Number') },
+              { value: 'custom', label: t('panel.options.monthLabelMode.options.custom', 'Custom') },
+            ],
+          },
+          showIf: (options) => options.showMonthLabels,
+        })
+        .addTextInput({
+          path: 'monthLabelCustom',
+          name: t('panel.options.monthLabelCustom.name', 'Custom Month Labels'),
+          description: t(
+            'panel.options.monthLabelCustom.description',
+            'Comma-separated 12 labels, e.g. Jan,Feb,...,Dec'
+          ),
+          defaultValue: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
+          category: ['Labels'],
+          showIf: (o) => o.showMonthLabels && o.monthLabelMode === 'custom',
+        })
+        .addRadio({
+          path: 'weekStart',
+          name: t('panel.options.weekStart.name', 'Week Start Day'),
+          description: t('panel.options.weekStart.description', 'Choose on which day the week starts'),
+          defaultValue: 'sunday',
+          category: ['Labels'],
+          settings: {
+            options: [
+              { value: 'saturday', label: t('panel.options.weekStart.options.saturday', 'Saturday') },
+              { value: 'sunday', label: t('panel.options.weekStart.options.sunday', 'Sunday') },
+              { value: 'monday', label: t('panel.options.weekStart.options.monday', 'Monday') },
+            ],
+          },
+        })
         .addBooleanSwitch({
-          path: 'showLegend',
-          name: t('panel.options.showLegend.name', 'Show Legend'),
-          description: t('panel.options.showLegend.description', 'Display color legend'),
+          path: 'showWeekLabels',
+          name: t('panel.options.showWeekLabels.name', 'Show Week Labels'),
+          description: t('panel.options.showWeekLabels.description', 'Display day of week labels'),
           defaultValue: true,
           category: ['Labels'],
+        })
+        .addRadio({
+          path: 'weekLabelMode',
+          name: t('panel.options.weekLabelMode.name', 'Week Label Mode'),
+          description: t('panel.options.weekLabelMode.description', 'How to render week day labels'),
+          defaultValue: 'default',
+          category: ['Labels'],
+          settings: {
+            options: [
+              { value: 'default', label: t('panel.options.weekLabelMode.options.default', 'Default') },
+              { value: 'number', label: t('panel.options.weekLabelMode.options.number', 'Number') },
+              { value: 'custom', label: t('panel.options.weekLabelMode.options.custom', 'Custom') },
+            ],
+          },
+          showIf: (o) => o.showWeekLabels,
+        })
+        .addTextInput({
+          path: 'weekLabelCustom',
+          name: t('panel.options.weekLabelCustom.name', 'Custom Week Labels'),
+          description: t(
+            'panel.options.weekLabelCustom.description',
+            'Comma-separated 7 labels, e.g. Sun,Mon,...,Sat'
+          ),
+          defaultValue: 'Sun,Mon,Tue,Wed,Thu,Fri,Sat',
+          category: ['Labels'],
+          showIf: (o) => o.showWeekLabels && o.weekLabelMode === 'custom',
         })
 
         // Data settings
@@ -139,83 +205,14 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           },
         })
 
-    // Start day of week setting (use radio to avoid select-focus issues)
-    .addRadio({
-      path: 'weekStart',
-      name: t('panel.options.weekStart.name', 'Week starts on'),
-      description: t('panel.options.weekStart.description', 'Choose whether the week starts on Sunday or Monday'),
-      defaultValue: 'sunday',
-      category: ['Layout'],
-      settings: {
-        options: [
-          { value: 'sunday', label: t('panel.options.weekStart.options.sunday', 'Sunday') },
-          { value: 'monday', label: t('panel.options.weekStart.options.monday', 'Monday') },
-        ],
-      },
-    })
-
-      // Month label mode
-      .addRadio({
-        path: 'monthLabelMode',
-        name: t('panel.options.monthLabelMode.name', 'Month label mode'),
-        description: t('panel.options.monthLabelMode.description', 'How to render month labels'),
-        defaultValue: 'default',
-        category: ['Labels'],
-        settings: {
-          options: [
-            { value: 'default', label: t('panel.options.monthLabelMode.options.default', 'Default') },
-            { value: 'number', label: t('panel.options.monthLabelMode.options.number', 'Number') },
-            { value: 'custom', label: t('panel.options.monthLabelMode.options.custom', 'Custom') },
-          ],
-        },
-      })
-      .addTextInput({
-        path: 'monthLabelCustom',
-        name: t('panel.options.monthLabelCustom.name', 'Custom month labels'),
-        description: t(
-          'panel.options.monthLabelCustom.description',
-          'Comma-separated 12 labels, e.g. Jan,Feb,...,Dec or 01,02,...,12'
-        ),
-        defaultValue: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
-        category: ['Labels'],
-        showIf: (o) => o.monthLabelMode === 'custom',
-      })
-
-      // Week label mode
-      .addRadio({
-        path: 'weekLabelMode',
-        name: t('panel.options.weekLabelMode.name', 'Week label mode'),
-        description: t('panel.options.weekLabelMode.description', 'How to render week day labels'),
-        defaultValue: 'default',
-        category: ['Labels'],
-        settings: {
-          options: [
-            { value: 'default', label: t('panel.options.weekLabelMode.options.default', 'Default') },
-            { value: 'number', label: t('panel.options.weekLabelMode.options.number', 'Number') },
-            { value: 'custom', label: t('panel.options.weekLabelMode.options.custom', 'Custom') },
-          ],
-        },
-      })
-      
-      .addTextInput({
-        path: 'weekLabelCustom',
-        name: t('panel.options.weekLabelCustom.name', 'Custom week labels'),
-        description: t(
-          'panel.options.weekLabelCustom.description',
-          'Comma-separated 7 labels, e.g. Sun,Mon,...,Sat or 1,2,...,7'
-        ),
-        defaultValue: 'Sun,Mon,Tue,Wed,Thu,Fri,Sat',
-        category: ['Labels'],
-        showIf: (o) => o.weekLabelMode === 'custom',
-      })
-
-      // Interaction
-      .addBooleanSwitch({
-        path: 'showTooltip',
-        name: t('panel.options.showTooltip.name', 'Show Tooltip'),
-        description: t('panel.options.showTooltip.description', 'Show tooltip on hover'),
-        defaultValue: true,
-        category: ['Interaction'],
-      });
+        // Interaction
+        .addBooleanSwitch({
+          path: 'showTooltip',
+          name: t('panel.options.showTooltip.name', 'Show Tooltip'),
+          description: t('panel.options.showTooltip.description', 'Show tooltip on hover'),
+          defaultValue: true,
+          category: ['Interaction'],
+        })
+    );
   })
   .setNoPadding();

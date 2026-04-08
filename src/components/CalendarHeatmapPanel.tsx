@@ -5,54 +5,38 @@ import HeatMap from '@uiw/react-heat-map';
 import { CalendarHeatmapOptions, HeatmapValue } from '../types';
 import { processTimeSeriesData } from '../utils/dataProcessor';
 import { getColorPalette } from '../utils/colorHelpers';
+import { shiftHeatMapData, splitCsv, shiftDates, rotateWeek, getWeekCount, formatDate, reverseShift } from '../utils/dateHelpers';
 import { css } from '@emotion/css';
 import { t } from '@grafana/i18n';
 
 interface Props extends PanelProps<CalendarHeatmapOptions> {}
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-function addDays(date: Date, days: number): Date {
-  return new Date(date.getTime() + days * DAY_MS);
-}
-
-/** Parse either YYYY/MM/DD or YYYY-MM-DD */
-function parseAnyYMD(dateStr: string): Date | null {
-  const s = String(dateStr).trim();
-  const parts = s.includes('/') ? s.split('/') : s.includes('-') ? s.split('-') : [];
-  if (parts.length !== 3) {
-    return null;
+function getDefaultNumberOrCustom(
+  showLabels: boolean,
+  labelMode: string,
+  customLabels: string,
+  defaultLabels: string[]
+): string[] | false {
+  if (!showLabels) {
+    return false as const;
   }
-  const [y, m, d] = parts.map((x) => Number(x));
-  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) {
-    return null;
+
+  const defaultLength = defaultLabels.length;
+
+  if (labelMode === 'number') {
+    return defaultLabels.map((_, i) => String(i + 1).padStart(2, '0')); // 01..12 or 01..07
   }
-  return new Date(y, m - 1, d);
-}
 
-/** Must match dataProcessor.ts formatDate(): YYYY/MM/DD */
-function toKey(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}/${month}/${day}`;
-}
-
-function splitCsv(input: string): string[] {
-  return String(input)
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-}
-
-function rotateWeek(labelsSunFirst: string[], weekStart: 'sunday' | 'monday'): string[] {
-  // Input is always Sun..Sat
-  if (labelsSunFirst.length !== 7) {
-    return labelsSunFirst;
+  if (labelMode === 'custom') {
+    const custom = splitCsv(customLabels);
+    if (custom.length === defaultLength) {
+      return custom;
+    }
+    // fall through to default if invalid
   }
-  return weekStart === 'monday'
-    ? [...labelsSunFirst.slice(1), labelsSunFirst[0]] // Mon..Sat + Sun
-    : labelsSunFirst; // Sun..Sat
+
+  // default
+  return defaultLabels;
 }
 
 export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, options, timeRange, timeZone, title }) => {
@@ -65,7 +49,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
   const countByOriginalDate = useMemo(() => {
     const m = new Map<string, number>();
     for (const d of heatmapData) {
-      m.set(d.date, d.count); // keys are YYYY/MM/DD
+      m.set(d.originalDate, d.count);
     }
     return m;
   }, [heatmapData]);
@@ -75,35 +59,16 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
 
   const availableWidth = useMemo(() => Math.max(0, width - 32), [width]);
 
-  // Monday-first: shift render dates by -1 day to rotate weekday rows so Sunday becomes last
-  const renderShiftDays = options.weekStart === 'monday' ? -1 : 0;
+  const shiftedHeatmapData: HeatmapValue[] = useMemo(
+    () => shiftHeatMapData(options.weekStart, heatmapData, timeZone),
+    [heatmapData, options.weekStart, timeZone]
+  );
 
-  const shiftedStartDate = useMemo(() => addDays(rawStartDate, renderShiftDays), [rawStartDate, renderShiftDays]);
-  const shiftedEndDate = useMemo(() => addDays(rawEndDate, renderShiftDays), [rawEndDate, renderShiftDays]);
-
-  const shiftedHeatmapData: HeatmapValue[] = useMemo(() => {
-    if (renderShiftDays === 0) {
-      return heatmapData;
-    }
-
-    return heatmapData.map((d) => {
-      const dt = parseAnyYMD(d.date);
-      if (!dt) {
-        return d;
-      }
-      const shifted = addDays(dt, renderShiftDays);
-      return { date: toKey(shifted), count: d.count };
-    });
-  }, [heatmapData, renderShiftDays]);
-
-  const weekCount = useMemo(() => {
-    const alignedStart = !shiftedStartDate.getDay()
-      ? shiftedStartDate
-      : new Date(shiftedStartDate.getTime() - shiftedStartDate.getDay() * DAY_MS);
-
-    const diffDays = Math.max(0, Math.floor((shiftedEndDate.getTime() - alignedStart.getTime()) / DAY_MS));
-    return Math.max(1, Math.ceil((diffDays + 1) / 7));
-  }, [shiftedStartDate, shiftedEndDate]);
+  const [shiftedStartDate, shiftedEndDate] = useMemo(
+    () => shiftDates(options.weekStart, [rawStartDate, rawEndDate]),
+    [rawStartDate, rawEndDate, options.weekStart]
+  );
+  const weekCount = useMemo(() => getWeekCount(shiftedStartDate, shiftedEndDate), [shiftedStartDate, shiftedEndDate]);
 
   const computedRectSize = useMemo(() => {
     if (!options.autoRectSize) {
@@ -117,24 +82,12 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
   }, [options.autoRectSize, options.rectSize, options.showWeekLabels, options.space, availableWidth, weekCount]);
 
   const weekLabels = useMemo(() => {
-    if (!options.showWeekLabels) {
-      return false as const;
-    }
-
     // 1) Build base labels in Sun..Sat order
-    let labelsSunFirst: string[] | null = null;
-
-    if (options.weekLabelMode === 'number') {
-      // Sun..Sat => 1..7 (then rotate by weekStart)
-      labelsSunFirst = ['1', '2', '3', '4', '5', '6', '7'];
-    } else if (options.weekLabelMode === 'custom') {
-      const custom = splitCsv(options.weekLabelCustom);
-      labelsSunFirst = custom.length === 7 ? custom : null;
-    }
-
-    if (!labelsSunFirst) {
-      // default (Sun..Sat)
-      labelsSunFirst = [
+    const labelsSunFirst = getDefaultNumberOrCustom(
+      options.showWeekLabels,
+      options.weekLabelMode,
+      options.weekLabelCustom,
+      [
         t('panel.component.weekLabels.sun', 'Sun'),
         t('panel.component.weekLabels.mon', 'Mon'),
         t('panel.component.weekLabels.tue', 'Tue'),
@@ -142,51 +95,30 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
         t('panel.component.weekLabels.thu', 'Thu'),
         t('panel.component.weekLabels.fri', 'Fri'),
         t('panel.component.weekLabels.sat', 'Sat'),
-      ];
-    }
-
+      ]
+    );
     // 2) Rotate for weekStart (Monday-first => Mon..Sun)
-    return rotateWeek(labelsSunFirst, options.weekStart);
-  }, [
-    options.showWeekLabels,
-    options.weekStart,
-    options.weekLabelMode,
-    options.weekLabelCustom,
-  ]);
+    return labelsSunFirst ? rotateWeek(labelsSunFirst, options.weekStart) : false;
+  }, [options.showWeekLabels, options.weekStart, options.weekLabelMode, options.weekLabelCustom]);
 
-  const monthLabels = useMemo(() => {
-    if (!options.showMonthLabels) {
-      return false as const;
-    }
-
-    if (options.monthLabelMode === 'number') {
-      return ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
-    }
-
-    if (options.monthLabelMode === 'custom') {
-      const custom = splitCsv(options.monthLabelCustom);
-      if (custom.length === 12) {
-        return custom;
-      }
-      // fall through to default if invalid
-    }
-
-    // default
-    return [
-      t('panel.component.monthLabels.jan', 'Jan'),
-      t('panel.component.monthLabels.feb', 'Feb'),
-      t('panel.component.monthLabels.mar', 'Mar'),
-      t('panel.component.monthLabels.apr', 'Apr'),
-      t('panel.component.monthLabels.may', 'May'),
-      t('panel.component.monthLabels.jun', 'Jun'),
-      t('panel.component.monthLabels.jul', 'Jul'),
-      t('panel.component.monthLabels.aug', 'Aug'),
-      t('panel.component.monthLabels.sep', 'Sep'),
-      t('panel.component.monthLabels.oct', 'Oct'),
-      t('panel.component.monthLabels.nov', 'Nov'),
-      t('panel.component.monthLabels.dec', 'Dec'),
-    ];
-  }, [options.showMonthLabels, options.monthLabelMode, options.monthLabelCustom]);
+  const monthLabels = useMemo(
+    () =>
+      getDefaultNumberOrCustom(options.showMonthLabels, options.monthLabelMode, options.monthLabelCustom, [
+        t('panel.component.monthLabels.jan', 'Jan'),
+        t('panel.component.monthLabels.feb', 'Feb'),
+        t('panel.component.monthLabels.mar', 'Mar'),
+        t('panel.component.monthLabels.apr', 'Apr'),
+        t('panel.component.monthLabels.may', 'May'),
+        t('panel.component.monthLabels.jun', 'Jun'),
+        t('panel.component.monthLabels.jul', 'Jul'),
+        t('panel.component.monthLabels.aug', 'Aug'),
+        t('panel.component.monthLabels.sep', 'Sep'),
+        t('panel.component.monthLabels.oct', 'Oct'),
+        t('panel.component.monthLabels.nov', 'Nov'),
+        t('panel.component.monthLabels.dec', 'Dec'),
+      ]),
+    [options.showMonthLabels, options.monthLabelMode, options.monthLabelCustom]
+  );
 
   const maxValue = useMemo(() => {
     if (heatmapData.length === 0) {
@@ -282,23 +214,13 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
         monthLabels={monthLabels}
         panelColors={colors}
         rectRender={(props, cell) => {
-          // Convert rendered cell date back to original date for correct tooltip/value
-          const renderedDate = parseAnyYMD(cell.date);
-          let originalKey = String(cell.date);
-
-          if (renderedDate) {
-            const originalDate = addDays(renderedDate, -renderShiftDays); // reverse shift
-            originalKey = toKey(originalDate);
-          } else {
-            originalKey = String(cell.date).replace(/-/g, '/');
-          }
-
-          const originalCount = countByOriginalDate.get(originalKey);
-
+          const typedCell = cell as unknown as HeatmapValue;
+          const date = typedCell.originalDate ?? formatDate(reverseShift(options.weekStart, typedCell.date), timeZone);
+          const originalCount = countByOriginalDate.get(typedCell.originalDate);
           const tooltipContent =
             originalCount !== undefined
-              ? `${originalKey}: ${originalCount.toLocaleString()}`
-              : `${originalKey}: ${t('panel.component.tooltip.noData', 'No data')}`;
+              ? `${date}: ${originalCount.toLocaleString()}`
+              : `${date}: ${t('panel.component.tooltip.noData', 'No data')}`;
 
           if (!options.showTooltip) {
             return <rect {...props} rx={options.radius} />;

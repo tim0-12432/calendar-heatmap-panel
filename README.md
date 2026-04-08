@@ -150,28 +150,37 @@ ORDER BY toDate(timestamp);
 
 ### Display Options
 
-| Option          | Type    | Default | Description                                      |
-| --------------- | ------- | ------- | ------------------------------------------------ |
-| Color Scheme    | Select  | `green` | Palette for cell intensity                       |
-| Auto Size Cells | Boolean | `true`  | Fit cells to available width                     |
-| Cell Size       | Number  | `12`    | Cell size in pixels (8–20) when auto-size is off |
-| Cell Spacing    | Number  | `2`     | Gap between cells in pixels (1–24)               |
-| Border Radius   | Number  | `2`     | Corner radius in pixels (0–6)                    |
+| Option          | Type    | Default  | Description                                      |
+| --------------- | ------- | -------- | ------------------------------------------------ |
+| Color Scheme    | Select  | `green`  | Palette for cell intensity                       |
+| Empty Color     | Color   | None     | Color for 0 values                               |
+| Auto Size Cells | Boolean | `true`   | Fit cells to available width                     |
+| Cell Size       | Number  | `12`     | Cell size in pixels (8–20) when auto-size is off |
+| Cell Spacing    | Number  | `2`      | Gap between cells in pixels (1–24)               |
+| Border Radius   | Number  | `2`      | Corner radius in pixels (0–6)                    |
+| Week Start      | Radio   | `Sunday` | Start of the week                                |
 
 ### Label & Legend Options
 
-| Option            | Type    | Default | Description                       |
-| ----------------- | ------- | ------- | --------------------------------- |
-| Show Week Labels  | Boolean | `true`  | Display weekday labels (Mon–Sun)  |
-| Show Month Labels | Boolean | `true`  | Display month headers             |
-| Show Legend       | Boolean | `true`  | Show legend for color intensities |
+| Option            | Type    | Default   | Description                           |
+| ----------------- | ------- | --------- | ------------------------------------- |
+| Show Week Labels  | Boolean | `true`    | Display weekday labels (Mon–Sun)      |
+| Show Month Labels | Boolean | `true`    | Display month headers                 |
+| Show Legend       | Boolean | `true`    | Show legend for color intensities     |
+| Month Label Mode  | Radio   | `default` | Define how months should be displayed |
+| Week Label Mode   | Radio   | `default` | Define how weekdays should be shown   |
 
 ### Data Options
 
-| Option             | Type    | Default | Description                                      |
-| ------------------ | ------- | ------- | ------------------------------------------------ |
-| Aggregation Method | Select  | `sum`   | Sum, Count, Average, Maximum, or Minimum per day |
-| Show Tooltip       | Boolean | `true`  | Enable tooltips with date and value              |
+| Option             | Type   | Default | Description                                      |
+| ------------------ | ------ | ------- | ------------------------------------------------ |
+| Aggregation Method | Select | `sum`   | Sum, Count, Average, Maximum, or Minimum per day |
+
+### Interaction Options
+
+| Option       | Type    | Default | Description                         |
+| ------------ | ------- | ------- | ----------------------------------- |
+| Show Tooltip | Boolean | `true`  | Enable tooltips with date and value |
 
 ### Color Schemes
 
@@ -183,6 +192,7 @@ ORDER BY toDate(timestamp);
 | Yellow | Bright and energetic | Warnings, energy metrics   |
 | Purple | Distinctive accent   | Creative or custom metrics |
 | Orange | Warm and inviting    | Engagement, user activity  |
+| Custom | Customized scheme    |                            |
 
 ### Aggregation Methods
 
@@ -193,6 +203,8 @@ ORDER BY toDate(timestamp);
 | Average | Mean of values           | Performance metrics  |
 | Maximum | Highest value            | Peaks and capacity   |
 | Minimum | Lowest value             | Baselines and minima |
+| First   | First value              |                      |
+| Last    | Last value               |                      |
 
 ## 🎯 Use Cases
 

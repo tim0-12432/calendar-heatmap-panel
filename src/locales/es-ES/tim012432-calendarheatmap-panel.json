@@ -101,6 +101,41 @@
       "customColor": {
         "description": "Color base para la paleta personalizada (otros colores se derivarán de este)",
         "name": "Tema de Color Personalizado"
+      },
+      "monthLabelMode": {
+        "description": "Cómo renderizar las etiquetas de los meses",
+        "name": "Modo de Etiqueta de Mes",
+        "options": {
+          "default": "Predeterminado",
+          "number": "Número",
+          "custom": "Personalizado"
+        }
+      },
+      "monthLabelCustom": {
+        "description": "Etiquetas personalizadas para los meses, separadas por comas, por ejemplo Ene,Feb,...,Dic",
+        "name": "Etiquetas de Mes Personalizadas"
+      },
+      "weekLabelMode": {
+        "description": "Cómo renderizar las etiquetas de los días de la semana",
+        "name": "Modo de Etiqueta de Semana",
+        "options": {
+          "default": "Predeterminado",
+          "number": "Número",
+          "custom": "Personalizado"
+        }
+      },
+      "weekLabelCustom": {
+        "description": "Etiquetas personalizadas para los días de la semana, separadas por comas, por ejemplo Dom,Lun,...,Sáb",
+        "name": "Etiquetas de Semana Personalizadas"
+      },
+      "weekStart": {
+        "description": "Día de la semana con el que comienza la semana",
+        "name": "Inicio de semana",
+        "options": {
+          "saturday": "Sábado",
+          "sunday": "Domingo",
+          "monday": "Lunes"
+        }
       }
     }
   }

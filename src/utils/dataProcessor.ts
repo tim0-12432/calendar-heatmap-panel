@@ -1,5 +1,6 @@
-import { DataFrame, FieldType, dateTime, dateTimeFormat } from '@grafana/data';
+import { DataFrame, FieldType } from '@grafana/data';
 import { HeatmapValue } from '../types';
+import { formatDate } from './dateHelpers';
 
 type Aggregation = 'sum' | 'count' | 'avg' | 'max' | 'min' | 'last' | 'first';
 
@@ -32,10 +33,7 @@ export function processTimeSeriesData(
       }
 
       // Important: format dates using Grafana's timezone to ensure correct bucketing
-      const date = dateTimeFormat(dateTime(timestamp), {
-        format: 'YYYY/MM/DD',
-        timeZone,
-      });
+      const date = formatDate(new Date(timestamp), timeZone);
 
       if (!dailyData.has(date)) {
         dailyData.set(date, []);
@@ -47,7 +45,7 @@ export function processTimeSeriesData(
   const result: HeatmapValue[] = [];
   dailyData.forEach((values, date) => {
     const count = aggregate(values, aggregation);
-    result.push({ date, count: Math.round(count * 100) / 100 });
+    result.push({ date, originalDate: date, count: Math.round(count * 100) / 100 });
   });
 
   result.sort((a, b) => a.date.localeCompare(b.date));
