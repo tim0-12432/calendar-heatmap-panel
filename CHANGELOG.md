@@ -15,21 +15,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Last and First Aggregation** when multiple values per day
-- **Empty Color** used when value is 0 can be configured
-- **Custom Color Theme** can be configured
-- **Start of Week day** can be changed between Saturday, Sunday and Monday
-- **Weekday Labels** can be changed to numbers or customized
-- **Month Labels** can be configured, as well
-- **Support for Grafana 13 with React 19**
+- **Last and First Aggregation** methods for days with multiple values
+- **Empty Color** for days with no data can now be configured
+- **Custom Color Themes**
+- **Start of Week day** can be set to Saturday, Sunday, or Monday
+- **Configurable Weekday Labels**: use numbers or custom text
+- **Configurable Month Labels**, as well
+- **Grafana 13 and React 19** support
 
 ### Changed
 
-- **Alignment and Spacing** of heatmap in panel
+- **Improved Alignment and Spacing** of heatmap within the panel
 
 ### Fixed
 
-- **Timezone** aware bucket computing
+- **Timezone-aware** bucket computing
 
 ## [1.0.4] - 2026-01-20
 

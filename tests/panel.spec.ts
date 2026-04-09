@@ -1,5 +1,5 @@
 import { expect, test, type PanelEditPage } from '@grafana/plugin-e2e';
-import type { Locator } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 
 const DASHBOARD_FILE = 'dashboard.json';
 const PANEL_WITH_DATA_ID = '1';
@@ -14,6 +14,7 @@ const MONTH_LABEL_SELECTOR = `${HEATMAP_SELECTOR} text[data-size]`;
 type PanelDeps = {
   readProvisionedDashboard: (args: { fileName: string }) => Promise<unknown>;
   gotoPanelEditPage: (args: { dashboard?: any; id: string }) => Promise<PanelEditPage>;
+  request: APIRequestContext;
 };
 
 type HeatmapCellFill = {
@@ -21,8 +22,125 @@ type HeatmapCellFill = {
   fill: string;
 };
 
-async function toggleSwitch(switchLocator: Locator) {
-  await switchLocator.click({ force: true });
+type PanelOptionsOverrides = Record<string, unknown>;
+
+type DashboardPanel = {
+  id?: number | string;
+  options?: Record<string, unknown>;
+};
+
+type ProvisionedDashboard = {
+  id?: number;
+  uid?: string;
+  title?: string;
+  version?: number;
+  panels?: DashboardPanel[];
+  [key: string]: unknown;
+};
+
+const tempDashboardUids = new Set<string>();
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function deepCloneProvisionedDashboard(dashboard: unknown): ProvisionedDashboard {
+  return JSON.parse(JSON.stringify(dashboard)) as ProvisionedDashboard;
+}
+
+function mergeOptions(base: Record<string, unknown>, overrides: Record<string, unknown>): Record<string, unknown> {
+  const merged: Record<string, unknown> = { ...base };
+
+  for (const [key, value] of Object.entries(overrides)) {
+    const existingValue = merged[key];
+
+    if (isRecord(existingValue) && isRecord(value)) {
+      merged[key] = mergeOptions(existingValue, value);
+      continue;
+    }
+
+    merged[key] = value;
+  }
+
+  return merged;
+}
+
+function applyPanelOptionsOverrides(
+  dashboard: ProvisionedDashboard,
+  panelId: string,
+  overrides: PanelOptionsOverrides
+) {
+  if (!Array.isArray(dashboard.panels)) {
+    throw new Error('Provisioned dashboard does not contain a panels array.');
+  }
+
+  const panel = dashboard.panels.find((candidate) => String(candidate.id) === panelId);
+  if (!panel) {
+    throw new Error(`Could not find panel with id "${panelId}" in provisioned dashboard.`);
+  }
+
+  const currentOptions = isRecord(panel.options) ? panel.options : {};
+  panel.options = mergeOptions(currentOptions, overrides);
+}
+
+function createTempDashboardUid(baseUid: string): string {
+  const uidPrefix = baseUid
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  const normalizedPrefix = uidPrefix || 'calendar-heatmap-e2e';
+  const uniqueSuffix = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  const maxPrefixLength = Math.max(1, 40 - uniqueSuffix.length - 1);
+
+  return `${normalizedPrefix.slice(0, maxPrefixLength)}-${uniqueSuffix}`;
+}
+
+async function createTemporaryDashboardWithOverrides(args: {
+  panelId: string;
+  overrides: PanelOptionsOverrides;
+  provisionedDashboard: unknown;
+  request: APIRequestContext;
+}): Promise<string> {
+  const { panelId, overrides, provisionedDashboard, request } = args;
+
+  const dashboard = deepCloneProvisionedDashboard(provisionedDashboard);
+  applyPanelOptionsOverrides(dashboard, panelId, overrides);
+
+  const baseUid = typeof dashboard.uid === 'string' && dashboard.uid.length > 0 ? dashboard.uid : 'calendar-heatmap';
+  const tempUid = createTempDashboardUid(baseUid);
+  const baseTitle =
+    typeof dashboard.title === 'string' && dashboard.title.length > 0
+      ? dashboard.title
+      : 'Calendar Heatmap Temporary Dashboard';
+
+  dashboard.uid = tempUid;
+  dashboard.title = `${baseTitle} (temp ${tempUid})`;
+  delete dashboard.id;
+  delete dashboard.version;
+
+  const createResponse = await request.post('/api/dashboards/db', {
+    data: {
+      dashboard,
+      folderId: 0,
+      overwrite: false,
+    },
+  });
+
+  if (!createResponse.ok()) {
+    const body = await createResponse.text();
+    throw new Error(
+      `Failed to create temporary dashboard for panel ${panelId}: ${createResponse.status()} ${createResponse.statusText()} ${body}`
+    );
+  }
+
+  const payload = (await createResponse.json()) as unknown;
+  if (!isRecord(payload) || typeof payload.uid !== 'string' || payload.uid.length === 0) {
+    throw new Error('Grafana dashboard create API response did not include a dashboard uid.');
+  }
+
+  return payload.uid;
 }
 
 async function waitForPanelReady(panelEditPage: PanelEditPage) {
@@ -86,12 +204,56 @@ async function waitForPanelReady(panelEditPage: PanelEditPage) {
   );
 }
 
-async function openPanelEditPageById(id: string, deps: PanelDeps) {
-  const dashboard = await deps.readProvisionedDashboard({ fileName: DASHBOARD_FILE });
-  const panelEditPage = await deps.gotoPanelEditPage({ dashboard, id });
+async function openPanelEditPageById(id: string, deps: PanelDeps, overrides?: PanelOptionsOverrides) {
+  const provisionedDashboard = await deps.readProvisionedDashboard({ fileName: DASHBOARD_FILE });
+
+  if (!overrides) {
+    const dashboard = deepCloneProvisionedDashboard(provisionedDashboard);
+    const panelEditPage = await deps.gotoPanelEditPage({ dashboard, id });
+    await waitForPanelReady(panelEditPage);
+    return panelEditPage;
+  }
+
+  const tempUid = await createTemporaryDashboardWithOverrides({
+    panelId: id,
+    overrides,
+    provisionedDashboard,
+    request: deps.request,
+  });
+  tempDashboardUids.add(tempUid);
+
+  const panelEditPage = await deps.gotoPanelEditPage({
+    dashboard: {
+      uid: tempUid,
+    },
+    id,
+  });
   await waitForPanelReady(panelEditPage);
   return panelEditPage;
 }
+
+test.beforeEach(() => {
+  tempDashboardUids.clear();
+});
+
+test.afterEach(async ({ request }) => {
+  const uidsToDelete = Array.from(tempDashboardUids);
+  tempDashboardUids.clear();
+
+  for (const uid of uidsToDelete) {
+    const deleteResponse = await request.delete(`/api/dashboards/uid/${encodeURIComponent(uid)}`);
+    if (deleteResponse.status() === 404) {
+      continue;
+    }
+
+    if (!deleteResponse.ok()) {
+      const body = await deleteResponse.text();
+      throw new Error(
+        `Failed to delete temporary dashboard uid ${uid}: ${deleteResponse.status()} ${deleteResponse.statusText()} ${body}`
+      );
+    }
+  }
+});
 
 function normalizeColor(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, '');
@@ -199,10 +361,12 @@ async function getFirstWeekLabel(panelEditPage: PanelEditPage): Promise<string> 
 test('shows "No data available" when the panel has no data', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
+  request,
 }) => {
   const panelEditPage = await openPanelEditPageById(PANEL_NO_DATA_ID, {
     gotoPanelEditPage,
     readProvisionedDashboard,
+    request,
   });
 
   await expect(panelEditPage.panel.locator.getByText('No data available')).toBeVisible({
@@ -211,10 +375,11 @@ test('shows "No data available" when the panel has no data', async ({
 });
 
 // 2. Panel with data should render the calendar heatmap
-test('renders calendar heatmap with data', async ({ gotoPanelEditPage, readProvisionedDashboard }) => {
+test('renders calendar heatmap with data', async ({ gotoPanelEditPage, readProvisionedDashboard, request }) => {
   const panelEditPage = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
     gotoPanelEditPage,
     readProvisionedDashboard,
+    request,
   });
 
   const heatmap = panelEditPage.panel.locator.locator(HEATMAP_SELECTOR);
@@ -225,106 +390,190 @@ test('renders calendar heatmap with data', async ({ gotoPanelEditPage, readProvi
 });
 
 // 3. Legend visibility toggle
-test('legend can be toggled on and off', async ({ gotoPanelEditPage, readProvisionedDashboard }) => {
-  const panelEditPage = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
+test('legend can be toggled on and off', async ({ gotoPanelEditPage, readProvisionedDashboard, request }) => {
+  const panelWithLegend = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
     gotoPanelEditPage,
     readProvisionedDashboard,
+    request,
   });
 
-  const legendLess = panelEditPage.panel.locator.getByText('Less');
-  const legendMore = panelEditPage.panel.locator.getByText('More');
-  const legendSwitch = panelEditPage.getCustomOptions('Labels').getSwitch('Show Legend').locator();
+  await expect(panelWithLegend.panel.locator.getByText('Less')).toBeVisible({ timeout: EXPECT_TIMEOUT });
+  await expect(panelWithLegend.panel.locator.getByText('More')).toBeVisible({ timeout: EXPECT_TIMEOUT });
 
-  await expect(legendSwitch).toBeVisible({ timeout: EXPECT_TIMEOUT });
-  await expect(legendLess).toBeVisible({ timeout: EXPECT_TIMEOUT });
-  await expect(legendMore).toBeVisible({ timeout: EXPECT_TIMEOUT });
+  const panelWithoutLegend = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showLegend: false,
+    }
+  );
 
-  await toggleSwitch(legendSwitch);
-  await expect(legendLess).toBeHidden({ timeout: EXPECT_TIMEOUT });
-  await expect(legendMore).toBeHidden({ timeout: EXPECT_TIMEOUT });
+  await expect(panelWithoutLegend.panel.locator.getByText('Less')).toBeHidden({ timeout: EXPECT_TIMEOUT });
+  await expect(panelWithoutLegend.panel.locator.getByText('More')).toBeHidden({ timeout: EXPECT_TIMEOUT });
 
-  await toggleSwitch(legendSwitch);
-  await expect(legendLess).toBeVisible({ timeout: EXPECT_TIMEOUT });
-  await expect(legendMore).toBeVisible({ timeout: EXPECT_TIMEOUT });
+  const panelWithLegendAgain = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showLegend: true,
+    }
+  );
+
+  await expect(panelWithLegendAgain.panel.locator.getByText('Less')).toBeVisible({ timeout: EXPECT_TIMEOUT });
+  await expect(panelWithLegendAgain.panel.locator.getByText('More')).toBeVisible({ timeout: EXPECT_TIMEOUT });
 });
 
 // 4. Week labels toggle
-test('week labels can be hidden and shown again', async ({ gotoPanelEditPage, readProvisionedDashboard }) => {
-  const panelEditPage = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
-    gotoPanelEditPage,
-    readProvisionedDashboard,
+test('week labels can be hidden and shown again', async ({ gotoPanelEditPage, readProvisionedDashboard, request }) => {
+  const panelWithWeekLabels = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showWeekLabels: true,
+    }
+  );
+
+  await expect(panelWithWeekLabels.panel.locator.locator(WEEK_LABEL_SELECTOR).first()).toBeVisible({
+    timeout: EXPECT_TIMEOUT,
   });
 
-  const weekLabels = panelEditPage.panel.locator.locator(WEEK_LABEL_SELECTOR);
-  const weekLabelsSwitch = panelEditPage.getCustomOptions('Labels').getSwitch('Show Week Labels').locator();
+  const panelWithoutWeekLabels = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showWeekLabels: false,
+    }
+  );
 
-  await expect(weekLabelsSwitch).toBeVisible({ timeout: EXPECT_TIMEOUT });
-  await expect(weekLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
+  await expect(panelWithoutWeekLabels.panel.locator.locator(WEEK_LABEL_SELECTOR).first()).toBeHidden({
+    timeout: EXPECT_TIMEOUT,
+  });
 
-  await toggleSwitch(weekLabelsSwitch);
-  await expect(weekLabels.first()).toBeHidden({ timeout: EXPECT_TIMEOUT });
+  const panelWithWeekLabelsAgain = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showWeekLabels: true,
+    }
+  );
 
-  await toggleSwitch(weekLabelsSwitch);
-  await expect(weekLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
+  await expect(panelWithWeekLabelsAgain.panel.locator.locator(WEEK_LABEL_SELECTOR).first()).toBeVisible({
+    timeout: EXPECT_TIMEOUT,
+  });
 });
 
 // 5. Month labels toggle
-test('month labels can be hidden and shown again', async ({ gotoPanelEditPage, readProvisionedDashboard }) => {
-  const panelEditPage = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
-    gotoPanelEditPage,
-    readProvisionedDashboard,
-  });
+test('month labels can be hidden and shown again', async ({ gotoPanelEditPage, readProvisionedDashboard, request }) => {
+  const panelWithMonthLabels = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showMonthLabels: true,
+    }
+  );
 
-  const monthLabels = panelEditPage.panel.locator.locator(MONTH_LABEL_SELECTOR);
-  const monthLabelsSwitch = panelEditPage.getCustomOptions('Labels').getSwitch('Show Month Labels').locator();
+  const monthLabelsVisible = panelWithMonthLabels.panel.locator.locator(MONTH_LABEL_SELECTOR);
+  await expect.poll(async () => monthLabelsVisible.count()).toBeGreaterThan(0);
+  await expect(monthLabelsVisible.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
 
-  await expect(monthLabelsSwitch).toBeVisible({ timeout: EXPECT_TIMEOUT });
+  const panelWithoutMonthLabels = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showMonthLabels: false,
+    }
+  );
 
-  const monthLabelsCount = await monthLabels.count();
+  const monthLabelsHidden = panelWithoutMonthLabels.panel.locator.locator(MONTH_LABEL_SELECTOR);
+  await expect
+    .poll(async () => {
+      const hiddenCount = await monthLabelsHidden.count();
+      if (hiddenCount === 0) {
+        return true;
+      }
 
-  if (monthLabelsCount > 0) {
-    await expect(monthLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
+      return !(await monthLabelsHidden.first().isVisible());
+    })
+    .toBeTruthy();
 
-    await toggleSwitch(monthLabelsSwitch);
-    await expect(monthLabels.first()).toBeHidden({ timeout: EXPECT_TIMEOUT });
+  const panelWithMonthLabelsAgain = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showMonthLabels: true,
+    }
+  );
 
-    await toggleSwitch(monthLabelsSwitch);
-    await expect(monthLabels.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
-  } else {
-    await toggleSwitch(monthLabelsSwitch);
-    await toggleSwitch(monthLabelsSwitch);
-  }
+  const monthLabelsVisibleAgain = panelWithMonthLabelsAgain.panel.locator.locator(MONTH_LABEL_SELECTOR);
+  await expect.poll(async () => monthLabelsVisibleAgain.count()).toBeGreaterThan(0);
+  await expect(monthLabelsVisibleAgain.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
 });
 
 // 6. Aggregation option supports First and Last
 test('aggregation can switch between First and Last and updates rendered cells', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
+  request,
 }) => {
-  const panelEditPage = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
-    gotoPanelEditPage,
-    readProvisionedDashboard,
-  });
+  const firstAggregationPage = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      aggregation: 'first',
+    }
+  );
 
-  const dataOptions = panelEditPage.getCustomOptions('Data');
-  const aggregationSelect = dataOptions.getSelect('Aggregation');
+  const firstAggregationFills = await getHeatmapCellFills(firstAggregationPage);
 
-  await aggregationSelect.selectOption('First');
-  await expect(aggregationSelect).toHaveSelected('First');
+  const lastAggregationPage = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      aggregation: 'last',
+    }
+  );
 
-  const firstAggregationFills = await getHeatmapCellFills(panelEditPage);
-
-  await aggregationSelect.selectOption('Last');
-  await expect(aggregationSelect).toHaveSelected('Last');
-
-  await expect
-    .poll(async () => {
-      const lastAggregationFills = await getHeatmapCellFills(panelEditPage);
-      return countChangedCellFills(firstAggregationFills, lastAggregationFills);
-    })
-    .toBeGreaterThan(0);
-
-  const lastAggregationFills = await getHeatmapCellFills(panelEditPage);
+  const lastAggregationFills = await getHeatmapCellFills(lastAggregationPage);
   const changedCount = countChangedCellFills(firstAggregationFills, lastAggregationFills);
 
   expect(
@@ -337,32 +586,36 @@ test('aggregation can switch between First and Last and updates rendered cells',
 test('empty color is configurable and applied to zero-value cells', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
+  request,
 }) => {
-  const panelEditPage = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
-    gotoPanelEditPage,
-    readProvisionedDashboard,
-  });
+  const baselinePage = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      aggregation: 'first',
+    }
+  );
 
-  const dataOptions = panelEditPage.getCustomOptions('Data');
-  const aggregationSelect = dataOptions.getSelect('Aggregation');
-  await aggregationSelect.selectOption('First');
-  await expect(aggregationSelect).toHaveSelected('First');
+  const fillsBeforeEmptyColor = await getHeatmapCellFills(baselinePage);
 
-  const fillsBeforeEmptyColor = await getHeatmapCellFills(panelEditPage);
+  const configuredEmptyColorPage = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      aggregation: 'first',
+      emptyColor: '#ff00ff',
+    }
+  );
 
-  const colorOptions = panelEditPage.getCustomOptions('Colors');
-  const emptyColorPicker = colorOptions.getColorPicker('Empty Color');
-
-  await emptyColorPicker.selectOption('#ff00ff');
-
-  await expect
-    .poll(async () => {
-      const fills = await getHeatmapCellFills(panelEditPage);
-      return fills.some((entry) => colorMatchesHex(entry.fill, '#ff00ff'));
-    })
-    .toBeTruthy();
-
-  const fillsAfterEmptyColor = await getHeatmapCellFills(panelEditPage);
+  const fillsAfterEmptyColor = await getHeatmapCellFills(configuredEmptyColorPage);
   const transitionedToTargetCount = countCellsTransitionedToColor(
     fillsBeforeEmptyColor,
     fillsAfterEmptyColor,
@@ -379,34 +632,36 @@ test('empty color is configurable and applied to zero-value cells', async ({
 test('custom color theme is configurable and changes heatmap colors', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
+  request,
 }) => {
-  const panelEditPage = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
-    gotoPanelEditPage,
-    readProvisionedDashboard,
-  });
+  const greenPage = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      colorScheme: 'green',
+    }
+  );
 
-  const colorOptions = panelEditPage.getCustomOptions('Colors');
-  const colorSchemeSelect = colorOptions.getSelect('Color Scheme');
+  const greenBaselineFills = await getHeatmapCellFills(greenPage);
 
-  await colorSchemeSelect.selectOption('Green');
-  await expect(colorSchemeSelect).toHaveSelected('Green');
+  const redCustomPage = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      colorScheme: 'custom',
+      customColor: '#ff0000',
+    }
+  );
 
-  const greenBaselineFills = await getHeatmapCellFills(panelEditPage);
-
-  await colorSchemeSelect.selectOption('Custom');
-  await expect(colorSchemeSelect).toHaveSelected('Custom');
-
-  const customColorPicker = colorOptions.getColorPicker('Custom Color Theme');
-  await customColorPicker.selectOption('#ff0000');
-
-  await expect
-    .poll(async () => {
-      const redCustomFills = await getHeatmapCellFills(panelEditPage);
-      return countChangedCellFills(greenBaselineFills, redCustomFills);
-    })
-    .toBeGreaterThan(0);
-
-  const redCustomFills = await getHeatmapCellFills(panelEditPage);
+  const redCustomFills = await getHeatmapCellFills(redCustomPage);
   const changedFromGreenToRed = countChangedCellFills(greenBaselineFills, redCustomFills);
 
   expect(
@@ -414,16 +669,20 @@ test('custom color theme is configurable and changes heatmap colors', async ({
     `Expected at least one cell fill to change after switching from Green to Custom (#ff0000); compared ${greenBaselineFills.length} baseline cells against ${redCustomFills.length} updated cells.`
   ).toBeGreaterThan(0);
 
-  await customColorPicker.selectOption('#0000ff');
+  const blueCustomPage = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      colorScheme: 'custom',
+      customColor: '#0000ff',
+    }
+  );
 
-  await expect
-    .poll(async () => {
-      const blueCustomFills = await getHeatmapCellFills(panelEditPage);
-      return countChangedCellFills(redCustomFills, blueCustomFills);
-    })
-    .toBeGreaterThan(0);
-
-  const blueCustomFills = await getHeatmapCellFills(panelEditPage);
+  const blueCustomFills = await getHeatmapCellFills(blueCustomPage);
   const changedFromRedToBlue = countChangedCellFills(redCustomFills, blueCustomFills);
 
   expect(
@@ -436,117 +695,146 @@ test('custom color theme is configurable and changes heatmap colors', async ({
 test('week start day changes first rendered week label for Saturday/Sunday/Monday', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
-  page,
+  request,
 }) => {
-  const panelEditPage = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
-    gotoPanelEditPage,
-    readProvisionedDashboard,
-  });
+  const customWeekLabels = 'SUN_TOKEN,MON_TOKEN,TUE_TOKEN,WED_TOKEN,THU_TOKEN,FRI_TOKEN,SAT_TOKEN';
 
-  const labelsOptions = panelEditPage.getCustomOptions('Labels');
-  const showWeekLabelsSwitch = labelsOptions.getSwitch('Show Week Labels');
-  const weekLabelModeRadio = labelsOptions.getRadioGroup('Week Label Mode');
-  const weekStartDayRadio = labelsOptions.getRadioGroup('Week Start Day');
+  const sundayPanel = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showWeekLabels: true,
+      weekLabelMode: 'custom',
+      weekLabelCustom: customWeekLabels,
+      weekStart: 'sunday',
+    }
+  );
 
-  await showWeekLabelsSwitch.check();
-  await expect(showWeekLabelsSwitch).toBeChecked();
+  await expect.poll(() => getFirstWeekLabel(sundayPanel)).toBe('SUN_TOKEN');
 
-  await weekLabelModeRadio.check('Custom');
-  await expect(weekLabelModeRadio).toHaveChecked('Custom');
+  const mondayPanel = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showWeekLabels: true,
+      weekLabelMode: 'custom',
+      weekLabelCustom: customWeekLabels,
+      weekStart: 'monday',
+    }
+  );
 
-  const weekLabelInput = labelsOptions.getTextInput('Custom Week Labels');
-  await weekLabelInput.fill('SUN_TOKEN,MON_TOKEN,TUE_TOKEN,WED_TOKEN,THU_TOKEN,FRI_TOKEN,SAT_TOKEN');
-  await page.keyboard.press('Tab');
+  await expect.poll(() => getFirstWeekLabel(mondayPanel)).toBe('MON_TOKEN');
 
-  await weekStartDayRadio.check('Sunday');
-  await expect(weekStartDayRadio).toHaveChecked('Sunday');
-  await expect.poll(() => getFirstWeekLabel(panelEditPage)).toBe('SUN_TOKEN');
+  const saturdayPanel = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showWeekLabels: true,
+      weekLabelMode: 'custom',
+      weekLabelCustom: customWeekLabels,
+      weekStart: 'saturday',
+    }
+  );
 
-  await weekStartDayRadio.check('Monday');
-  await expect(weekStartDayRadio).toHaveChecked('Monday');
-  await expect.poll(() => getFirstWeekLabel(panelEditPage)).toBe('MON_TOKEN');
-
-  await weekStartDayRadio.check('Saturday');
-  await expect(weekStartDayRadio).toHaveChecked('Saturday');
-  await expect.poll(() => getFirstWeekLabel(panelEditPage)).toBe('SAT_TOKEN');
+  await expect.poll(() => getFirstWeekLabel(saturdayPanel)).toBe('SAT_TOKEN');
 });
 
 // 10. Weekday labels support number and custom modes
 test('weekday labels can be rendered as numbers or custom labels', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
-  page,
+  request,
 }) => {
-  const panelEditPage = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
-    gotoPanelEditPage,
-    readProvisionedDashboard,
-  });
-
-  const labelsOptions = panelEditPage.getCustomOptions('Labels');
-  const showWeekLabelsSwitch = labelsOptions.getSwitch('Show Week Labels');
-  const weekLabelModeRadio = labelsOptions.getRadioGroup('Week Label Mode');
-  const weekStartDayRadio = labelsOptions.getRadioGroup('Week Start Day');
-
-  await showWeekLabelsSwitch.check();
-  await expect(showWeekLabelsSwitch).toBeChecked();
-
-  await weekStartDayRadio.check('Sunday');
-  await expect(weekStartDayRadio).toHaveChecked('Sunday');
-
-  await weekLabelModeRadio.check('Number');
-  await expect(weekLabelModeRadio).toHaveChecked('Number');
+  const numberLabelsPanel = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showWeekLabels: true,
+      weekStart: 'sunday',
+      weekLabelMode: 'number',
+    }
+  );
 
   await expect
     .poll(async () => {
-      const labels = await getSvgTextValues(panelEditPage, WEEK_LABEL_SELECTOR);
+      const labels = await getSvgTextValues(numberLabelsPanel, WEEK_LABEL_SELECTOR);
       return labels.length > 0 && labels.every((label) => /^\d+$/.test(label));
     })
     .toBeTruthy();
 
-  await weekLabelModeRadio.check('Custom');
-  await expect(weekLabelModeRadio).toHaveChecked('Custom');
+  const customLabelsPanel = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showWeekLabels: true,
+      weekStart: 'sunday',
+      weekLabelMode: 'custom',
+      weekLabelCustom: 'WK1,WK2,WK3,WK4,WK5,WK6,WK7',
+    }
+  );
 
-  const weekLabelInput = labelsOptions.getTextInput('Custom Week Labels');
-  await weekLabelInput.fill('WK1,WK2,WK3,WK4,WK5,WK6,WK7');
-  await page.keyboard.press('Tab');
-
-  await expect.poll(() => getFirstWeekLabel(panelEditPage)).toBe('WK1');
+  await expect.poll(() => getFirstWeekLabel(customLabelsPanel)).toBe('WK1');
 });
 
 // 11. Month labels support number and custom modes
 test('month labels can be rendered as numbers or custom labels', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
-  page,
+  request,
 }) => {
-  const panelEditPage = await openPanelEditPageById(PANEL_WITH_DATA_ID, {
-    gotoPanelEditPage,
-    readProvisionedDashboard,
-  });
-
-  const labelsOptions = panelEditPage.getCustomOptions('Labels');
-  const showMonthLabelsSwitch = labelsOptions.getSwitch('Show Month Labels');
-  const monthLabelModeRadio = labelsOptions.getRadioGroup('Month Label Mode');
-
-  await showMonthLabelsSwitch.check();
-  await expect(showMonthLabelsSwitch).toBeChecked();
-
-  await monthLabelModeRadio.check('Number');
-  await expect(monthLabelModeRadio).toHaveChecked('Number');
+  const numberLabelsPanel = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showMonthLabels: true,
+      monthLabelMode: 'number',
+    }
+  );
 
   await expect
     .poll(async () => {
-      const labels = await getSvgTextValues(panelEditPage, MONTH_LABEL_SELECTOR);
+      const labels = await getSvgTextValues(numberLabelsPanel, MONTH_LABEL_SELECTOR);
       return labels.length > 0 && labels.every((label) => /^\d+$/.test(label));
     })
     .toBeTruthy();
 
-  await monthLabelModeRadio.check('Custom');
-  await expect(monthLabelModeRadio).toHaveChecked('Custom');
-
-  const monthLabelInput = labelsOptions.getTextInput('Custom Month Labels');
-  await monthLabelInput.fill('M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12');
-  await page.keyboard.press('Tab');
+  const customLabelsPanel = await openPanelEditPageById(
+    PANEL_WITH_DATA_ID,
+    {
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      request,
+    },
+    {
+      showMonthLabels: true,
+      monthLabelMode: 'custom',
+      monthLabelCustom: 'M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12',
+    }
+  );
 
   const allowedCustomLabels = new Set([
     'M01',
@@ -565,7 +853,7 @@ test('month labels can be rendered as numbers or custom labels', async ({
 
   await expect
     .poll(async () => {
-      const labels = await getSvgTextValues(panelEditPage, MONTH_LABEL_SELECTOR);
+      const labels = await getSvgTextValues(customLabelsPanel, MONTH_LABEL_SELECTOR);
       return labels.length > 0 && labels.every((label) => allowedCustomLabels.has(label));
     })
     .toBeTruthy();
