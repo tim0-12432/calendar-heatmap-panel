@@ -196,15 +196,15 @@ ORDER BY toDate(timestamp);
 
 ### Aggregation Methods
 
-| Method  | Description              | Best For             |
-| ------- | ------------------------ | -------------------- |
-| Sum     | Adds all values in a day | Counters, totals     |
-| Count   | Counts data points       | Event frequency      |
-| Average | Mean of values           | Performance metrics  |
-| Maximum | Highest value            | Peaks and capacity   |
-| Minimum | Lowest value             | Baselines and minima |
-| First   | First value              |                      |
-| Last    | Last value               |                      |
+| Method  | Description              | Best For                |
+| ------- | ------------------------ | ----------------------- |
+| Sum     | Adds all values in a day | Counters, totals        |
+| Count   | Counts data points       | Event frequency         |
+| Average | Mean of values           | Performance metrics     |
+| Maximum | Highest value            | Peaks and capacity      |
+| Minimum | Lowest value             | Baselines and minima    |
+| First   | First value              |                         |
+| Last    | Last value               | Daily cumulative counts |
 
 ## 🎯 Use Cases
 

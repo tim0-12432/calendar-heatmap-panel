@@ -67,6 +67,7 @@ Access Grafana at http://localhost:3000 (admin/admin).
 - Keep changes focused and minimal.
 - Update or add tests for new logic.
 - Update documentation when behavior changes.
+- Ensure necessary translations are in place.
 
 ## 💻 Development Environment
 
