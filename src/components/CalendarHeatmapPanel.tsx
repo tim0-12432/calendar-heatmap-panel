@@ -67,6 +67,13 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
 
   const availableWidth = useMemo(() => Math.max(0, width - 32), [width]);
 
+  const availableHeight = useMemo(() => {
+    const paddingVertical = 32; // 16px top + 16px bottom
+    const legendHeight = options.showLegend ? 40 : 0;
+    const monthLabelHeight = options.showMonthLabels ? 20 : 0;
+    return Math.max(0, height - paddingVertical - legendHeight - monthLabelHeight);
+  }, [height, options.showLegend, options.showMonthLabels]);
+
   const shiftedHeatmapData: HeatmapValue[] = useMemo(
     () => shiftHeatMapData(options.weekStart, heatmapData, timeZone),
     [heatmapData, options.weekStart, timeZone]
@@ -83,11 +90,29 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
       return options.rectSize;
     }
 
+    // Width constraint
     const leftPad = options.showWeekLabels ? 28 : 5;
-    const usable = Math.max(0, availableWidth - leftPad);
-    const raw = Math.floor(usable / weekCount) - options.space;
+    const usableWidth = Math.max(0, availableWidth - leftPad);
+    const maxRectByWidth = Math.floor(usableWidth / weekCount) - options.space;
+
+    // Height constraint
+    const monthLabelPad = options.showMonthLabels ? 20 : 0;
+    const usableHeight = Math.max(0, availableHeight - monthLabelPad);
+    const maxRectByHeight = Math.floor(usableHeight / 7) - options.space;
+
+    // Take the minimum to satisfy both constraints
+    const raw = Math.min(maxRectByWidth, maxRectByHeight);
     return Math.max(4, Math.min(24, raw));
-  }, [options.autoRectSize, options.rectSize, options.showWeekLabels, options.space, availableWidth, weekCount]);
+  }, [
+    options.autoRectSize,
+    options.rectSize,
+    options.showWeekLabels,
+    options.showMonthLabels,
+    options.space,
+    availableWidth,
+    availableHeight,
+    weekCount,
+  ]);
 
   const weekLabels = useMemo(() => {
     // 1) Build base labels in Sun..Sat order
@@ -213,7 +238,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
         startDate={shiftedStartDate}
         endDate={shiftedEndDate}
         width={availableWidth}
-        height={height - 80}
+        height={availableHeight}
         rectSize={computedRectSize}
         space={options.space}
         radius={options.radius}

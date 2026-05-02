@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nothing yet.
 
+## [1.1.1] - 2026-05-xx
+
+### Fixed
+
+- **Spacing and Placement** of heatmap inside the panel
+
 ## [1.1.0] - 2026-04-09
 
 ### Added
