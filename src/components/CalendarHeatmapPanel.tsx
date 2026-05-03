@@ -19,6 +19,10 @@ import { t } from '@grafana/i18n';
 
 interface Props extends PanelProps<CalendarHeatmapOptions> {}
 
+const maxRectSize = 64;
+const minRectSize = 8;
+const rectSizeBuffer = 0.2; // To allow some smaller and higher values when auto-sizing
+
 function getDefaultNumberOrCustom(
   showLabels: boolean,
   labelMode: string,
@@ -68,10 +72,9 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
   const availableWidth = useMemo(() => Math.max(0, width - 32), [width]);
 
   const availableHeight = useMemo(() => {
-    const paddingVertical = 32; // 16px top + 16px bottom
     const legendHeight = options.showLegend ? 40 : 0;
     const monthLabelHeight = options.showMonthLabels ? 20 : 0;
-    return Math.max(0, height - paddingVertical - legendHeight - monthLabelHeight);
+    return Math.max(0, height - legendHeight - monthLabelHeight);
   }, [height, options.showLegend, options.showMonthLabels]);
 
   const shiftedHeatmapData: HeatmapValue[] = useMemo(
@@ -93,21 +96,22 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
     // Width constraint
     const leftPad = options.showWeekLabels ? 28 : 5;
     const usableWidth = Math.max(0, availableWidth - leftPad);
-    const maxRectByWidth = Math.floor(usableWidth / weekCount) - options.space;
+    const maxRectByWidth = Math.floor((usableWidth - (weekCount - 1) * options.space) / weekCount);
 
     // Height constraint
-    const monthLabelPad = options.showMonthLabels ? 20 : 0;
-    const usableHeight = Math.max(0, availableHeight - monthLabelPad);
-    const maxRectByHeight = Math.floor(usableHeight / 7) - options.space;
+    const topBuffer = 20; // To prevent clipping of last row
+    const usableHeight = Math.max(0, availableHeight - topBuffer);
+    const maxRectByHeight = Math.floor((usableHeight - 6 * options.space) / 7);
 
     // Take the minimum to satisfy both constraints
     const raw = Math.min(maxRectByWidth, maxRectByHeight);
-    return Math.max(4, Math.min(24, raw));
+    const min = Math.floor(minRectSize * (1 - rectSizeBuffer));
+    const max = Math.ceil(maxRectSize * (1 + rectSizeBuffer));
+    return Math.max(min, Math.min(max, raw));
   }, [
     options.autoRectSize,
     options.rectSize,
     options.showWeekLabels,
-    options.showMonthLabels,
     options.space,
     availableWidth,
     availableHeight,
@@ -173,7 +177,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
         overflow: auto;
         padding: 16px;
         /* Remove top padding if title is shown to reduce unnecessary spacing */
@@ -182,10 +186,6 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
       heatmap: css`
         /* @uiw/react-heat-map sets inline color: var(--rhm-text-color, ...) */
         --rhm-text-color: ${theme.colors.text.secondary};
-
-        /* Ensure heatmap fills the container */
-        width: 100%;
-        height: 100%;
 
         /* Weekday labels */
         .w-heatmap-week {
@@ -199,6 +199,11 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
           font-size: 12px;
           font-weight: 600;
           fill: currentColor;
+        }
+
+        /* Correct week labels off placement */
+        > text.w-heatmap-week {
+          transform: translateY(-${computedRectSize/2+options.space/2}px); 
         }
       `,
       legend: css`
@@ -219,7 +224,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
         font-size: 14px;
       `,
     }),
-    [theme, options.radius, title]
+    [theme, options.radius, title, options.space, computedRectSize]
   );
 
   if (data.series.length === 0) {

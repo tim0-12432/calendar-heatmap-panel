@@ -15,7 +15,7 @@ A Grafana panel plugin that renders time-series data as an interactive calendar 
 
 - **Plugin ID:** `tim012432-calendarheatmap-panel`
 - **Author:** Tim0_12432
-- **Version:** 1.1.0
+- **Version:** 1.1.1
 
 ## 🌟 Features
 

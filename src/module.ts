@@ -63,7 +63,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           category: ['Layout'],
           settings: {
             min: 8,
-            max: 20,
+            max: 64,
             step: 1,
           },
           showIf: (options) => !options.autoRectSize,
@@ -88,7 +88,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           category: ['Layout'],
           settings: {
             min: 0,
-            max: 6,
+            max: 16,
             step: 1,
           },
         })
