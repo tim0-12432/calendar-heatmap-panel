@@ -1,0 +1,59 @@
+name: Version Consistency Check
+
+on:
+  pull_request:
+    branches:
+        - main
+    paths:
+        - 'package.json'
+        - 'CHANGELOG.md'
+        - 'README.md'
+  push:
+    branches:
+        - main
+    tags:
+      - 'v*'
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from package.json
+        id: pkg
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Package version: $VERSION"
+
+      - name: Check version appears twice in CHANGELOG.md
+        run: |
+          VERSION="${{ steps.pkg.outputs.version }}"
+          COUNT=$(grep -c "$VERSION" CHANGELOG.md || true)
+          echo "Found $COUNT occurrences of $VERSION in CHANGELOG.md"
+          if [ "$COUNT" -lt 2 ]; then
+            echo "::error::Version $VERSION must appear at least twice in CHANGELOG.md (found $COUNT)"
+            exit 1
+          fi
+
+      - name: Check version in README.md
+        run: |
+          VERSION="${{ steps.pkg.outputs.version }}"
+          if ! grep -q "$VERSION" README.md; then
+            echo "::error::Version $VERSION not found in README.md"
+            exit 1
+          fi
+
+    #   - name: Check version in other files
+    #     run: |
+    #       VERSION="${{ steps.pkg.outputs.version }}"
+    #       FILES=("docs/version.md" "src/constants.ts")
+    #       for FILE in "${FILES[@]}"; do
+    #         if [ -f "$FILE" ]; then
+    #           if ! grep -q "$VERSION" "$FILE"; then
+    #             echo "::error::Version $VERSION not found in $FILE"
+    #             exit 1
+    #           fi
+    #         fi
+    #       done
