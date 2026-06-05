@@ -1,12 +1,11 @@
-export interface DataLink {
-  title?: string;
+export interface CalendarDataLink {
   url?: string;
   targetBlank?: boolean;
 }
 
 export interface CalendarHeatmapOptions {
   // Data Links
-  dataLinks?: DataLink[];
+  dataLinks?: CalendarDataLink[];
   // Colors
   colorScheme: 'green' | 'blue' | 'red' | 'yellow' | 'purple' | 'orange' | 'custom';
   emptyColor: string;
