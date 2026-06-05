@@ -1,4 +1,4 @@
-import { PanelPlugin } from '@grafana/data';
+import { PanelPlugin, DataLink } from '@grafana/data';
 import { CalendarHeatmapPanel } from './components/CalendarHeatmapPanel';
 import { CalendarHeatmapOptions } from './types';
 import { initPluginTranslations, t } from '@grafana/i18n';
@@ -208,6 +208,13 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           name: t('panel.options.showTooltip.name', 'Show Tooltip'),
           description: t('panel.options.showTooltip.description', 'Show tooltip on hover'),
           defaultValue: true,
+          category: ['Interaction'],
+        })
+        .addDataLinks({
+          path: 'links',
+          name: t('panel.options.links.name', 'Data Links'),
+          description: t('panel.options.links.description', 'Links to other dashboards or external URLs'),
+          defaultValue: [],
           category: ['Interaction'],
         })
     );

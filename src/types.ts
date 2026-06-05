@@ -1,3 +1,5 @@
+import { DataLink } from '@grafana/data';
+
 export interface CalendarHeatmapOptions {
   // Colors
   colorScheme: 'green' | 'blue' | 'red' | 'yellow' | 'purple' | 'orange' | 'custom';
@@ -34,6 +36,9 @@ export interface CalendarHeatmapOptions {
 
   // Interaction
   showTooltip: boolean;
+
+  // Data links
+  dataLinks: DataLink[];
 }
 
 export interface HeatmapValue {
