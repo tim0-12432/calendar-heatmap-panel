@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
+import { css } from '@emotion/css';
 import { PanelProps } from '@grafana/data';
 import { useTheme2, Tooltip } from '@grafana/ui';
 import HeatMap from '@uiw/react-heat-map';
