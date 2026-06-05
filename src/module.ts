@@ -1,4 +1,5 @@
-import { PanelPlugin, DataLink } from '@grafana/data';
+import React from 'react';
+import { PanelPlugin } from '@grafana/data';
 import { CalendarHeatmapPanel } from './components/CalendarHeatmapPanel';
 import { CalendarHeatmapOptions } from './types';
 import { initPluginTranslations, t } from '@grafana/i18n';
@@ -210,13 +211,30 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           defaultValue: true,
           category: ['Interaction'],
         })
-        .addDataLinks({
-          path: 'links',
-          name: t('panel.options.links.name', 'Data Links'),
-          description: t('panel.options.links.description', 'Links to other dashboards or external URLs'),
-          defaultValue: [],
-          category: ['Interaction'],
-        })
+         .addCustomEditor({
+            path: 'dataLinks',
+            name: t('panel.options.links.name', 'Data Links'),
+            description: t('panel.options.links.description', 'Links to other dashboards or external URLs'),
+            defaultValue: [],
+            category: ['Interaction'],
+            editor: ({ value, onChange }) => {
+              const [text, setText] = React.useState(JSON.stringify(value || [], null, 2));
+              return (
+                <textarea
+                  value={text}
+                  onChange={(e) => {
+                    setText(e.target.value);
+                    try {
+                      onChange(JSON.parse(e.target.value));
+                    } catch {
+                      // keep invalid JSON
+                    }
+                  }}
+                  style={{ width: '100%', height: '80px', fontFamily: 'monospace' }}
+                />
+              );
+            },
+          })
     );
   })
   .setNoPadding();

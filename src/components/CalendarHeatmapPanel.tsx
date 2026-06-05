@@ -3,7 +3,7 @@ import { PanelProps } from '@grafana/data';
 import { useTheme2, Tooltip } from '@grafana/ui';
 import HeatMap from '@uiw/react-heat-map';
 import { CalendarHeatmapOptions, HeatmapValue } from '../types';
-import { ProcessTimeSeriesData } from '../utils/dataProcessor';
+import { processTimeSeriesData } from '../utils/dataProcessor';
 import { getColorPalette } from '../utils/colorHelpers';
 import { shiftHeatMapData, splitCsv, shiftDates, rotateWeek, getWeekCount, formatDate, reverseShift } from '../utils/dateHelpers';
 

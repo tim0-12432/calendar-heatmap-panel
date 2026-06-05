@@ -1,4 +1,9 @@
-import { DataLink } from '@grafana/data';
+export interface DataLink {
+  title: string;
+  url: string;
+  target?: string;
+}
+
 
 export interface CalendarHeatmapOptions {
   // Colors
@@ -30,7 +35,6 @@ export interface CalendarHeatmapOptions {
   monthLabelCustom: string; // comma-separated 12 labels
   weekLabelMode: 'default' | 'number' | 'custom';
   weekLabelCustom: string; // comma-separated 7 labels
-
   // Data
   aggregation: 'sum' | 'count' | 'avg' | 'max' | 'min' | 'last' | 'first';
 
