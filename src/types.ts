@@ -1,11 +1,12 @@
 export interface DataLink {
-  title: string;
-  url: string;
-  target?: string;
+  title?: string;
+  url?: string;
+  targetBlank?: boolean;
 }
 
-
 export interface CalendarHeatmapOptions {
+  // Data Links
+  dataLinks?: DataLink[];
   // Colors
   colorScheme: 'green' | 'blue' | 'red' | 'yellow' | 'purple' | 'orange' | 'custom';
   emptyColor: string;
@@ -35,14 +36,12 @@ export interface CalendarHeatmapOptions {
   monthLabelCustom: string; // comma-separated 12 labels
   weekLabelMode: 'default' | 'number' | 'custom';
   weekLabelCustom: string; // comma-separated 7 labels
+
   // Data
   aggregation: 'sum' | 'count' | 'avg' | 'max' | 'min' | 'last' | 'first';
 
   // Interaction
   showTooltip: boolean;
-
-  // Data links
-  dataLinks: DataLink[];
 }
 
 export interface HeatmapValue {
