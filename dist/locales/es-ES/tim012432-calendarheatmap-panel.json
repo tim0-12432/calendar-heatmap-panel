@@ -1,0 +1,142 @@
+{
+  "panel": {
+    "component": {
+      "legend": {
+        "less": "Menos",
+        "max": "Máximo",
+        "more": "Más",
+        "tooltip": "Nivel {{level}}"
+      },
+      "monthLabels": {
+        "apr": "Abr",
+        "aug": "Ago",
+        "dec": "Dic",
+        "feb": "Feb",
+        "jan": "Ene",
+        "jul": "Jul",
+        "jun": "Jun",
+        "mar": "Mar",
+        "may": "May",
+        "nov": "Nov",
+        "oct": "Oct",
+        "sep": "Sep"
+      },
+      "noData": "No hay datos disponibles",
+      "tooltip": {
+        "noData": "No hay datos"
+      },
+      "weekLabels": {
+        "fri": "vie",
+        "mon": "lun",
+        "sat": "sáb",
+        "sun": "dom",
+        "thu": "jue",
+        "tue": "mar",
+        "wed": "mié"
+      }
+    },
+    "options": {
+      "aggregation": {
+        "description": "Cómo agregar múltiples puntos de datos en el mismo día",
+        "name": "Agregación",
+        "options": {
+          "avg": "Promedio",
+          "count": "Cuenta",
+          "max": "Máximo",
+          "min": "Mínimo",
+          "sum": "Suma",
+          "first": "Primero",
+          "last": "Último"
+        }
+      },
+      "autoRectSize": {
+        "description": "Ajustar automáticamente las celdas al ancho del panel",
+        "name": "Tamaño automático de celda"
+      },
+      "colorScheme": {
+        "description": "Paleta de colores para el mapa de calor",
+        "name": "Esquema de colores",
+        "options": {
+          "blue": "Azul",
+          "green": "Verde",
+          "orange": "Naranja",
+          "purple": "Púrpura",
+          "red": "Rojo",
+          "yellow": "Amarillo",
+          "custom": "Personalizado"
+        }
+      },
+      "radius": {
+        "description": "Radio de las celdas del mapa de calor",
+        "name": "Radio de esquina"
+      },
+      "rectSize": {
+        "description": "Tamaño de cada celda diaria en píxeles",
+        "name": "Tamaño de celda"
+      },
+      "showLegend": {
+        "description": "Mostrar la leyenda del mapa de calor",
+        "name": "Mostrar leyenda"
+      },
+      "showMonthLabels": {
+        "description": "Mostrar etiquetas de los meses",
+        "name": "Mostrar etiquetas de mes"
+      },
+      "showTooltip": {
+        "description": "Mostrar información sobre herramientas al pasar el cursor",
+        "name": "Mostrar información sobre herramientas"
+      },
+      "showWeekLabels": {
+        "description": "Mostrar etiquetas de los días de la semana",
+        "name": "Mostrar etiquetas de semana"
+      },
+      "space": {
+        "description": "Espacio entre celdas en píxeles",
+        "name": "Espacio"
+      },
+      "emptyColor": {
+        "description": "Color para los días con valor 0",
+        "name": "Color vacío"
+      },
+      "customColor": {
+        "description": "Color base para la paleta personalizada (otros colores se derivarán de este)",
+        "name": "Tema de Color Personalizado"
+      },
+      "monthLabelMode": {
+        "description": "Cómo renderizar las etiquetas de los meses",
+        "name": "Modo de Etiqueta de Mes",
+        "options": {
+          "default": "Predeterminado",
+          "number": "Número",
+          "custom": "Personalizado"
+        }
+      },
+      "monthLabelCustom": {
+        "description": "Etiquetas personalizadas para los meses, separadas por comas, por ejemplo Ene,Feb,...,Dic",
+        "name": "Etiquetas de Mes Personalizadas"
+      },
+      "weekLabelMode": {
+        "description": "Cómo renderizar las etiquetas de los días de la semana",
+        "name": "Modo de Etiqueta de Semana",
+        "options": {
+          "default": "Predeterminado",
+          "number": "Número",
+          "custom": "Personalizado"
+        }
+      },
+      "weekLabelCustom": {
+        "description": "Etiquetas personalizadas para los días de la semana, separadas por comas, por ejemplo Dom,Lun,...,Sáb",
+        "name": "Etiquetas de Semana Personalizadas"
+      },
+      "weekStart": {
+        "description": "Día de la semana con el que comienza la semana",
+        "name": "Inicio de semana",
+        "options": {
+          "saturday": "Sábado",
+          "sunday": "Domingo",
+          "monday": "Lunes"
+        }
+      }
+    }
+  }
+}

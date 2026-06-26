@@ -1,0 +1,142 @@
+{
+  "panel": {
+    "component": {
+      "legend": {
+        "less": "Less",
+        "max": "Max",
+        "more": "More",
+        "tooltip": "Level {{level}}"
+      },
+      "monthLabels": {
+        "apr": "Apr",
+        "aug": "Aug",
+        "dec": "Dec",
+        "feb": "Feb",
+        "jan": "Jan",
+        "jul": "Jul",
+        "jun": "Jun",
+        "mar": "Mar",
+        "may": "May",
+        "nov": "Nov",
+        "oct": "Oct",
+        "sep": "Sep"
+      },
+      "noData": "No data available",
+      "tooltip": {
+        "noData": "No data"
+      },
+      "weekLabels": {
+        "fri": "Fri",
+        "mon": "Mon",
+        "sat": "Sat",
+        "sun": "Sun",
+        "thu": "Thu",
+        "tue": "Tue",
+        "wed": "Wed"
+      }
+    },
+    "options": {
+      "aggregation": {
+        "description": "How to aggregate multiple data points on the same day",
+        "name": "Aggregation",
+        "options": {
+          "avg": "Average",
+          "count": "Count",
+          "max": "Maximum",
+          "min": "Minimum",
+          "sum": "Sum",
+          "first": "First",
+          "last": "Last"
+        }
+      },
+      "autoRectSize": {
+        "description": "Automatically fit cells to the panel width",
+        "name": "Auto Cell Size"
+      },
+      "colorScheme": {
+        "description": "Color palette for the heatmap",
+        "name": "Color Scheme",
+        "options": {
+          "blue": "Blue",
+          "green": "Green",
+          "orange": "Orange",
+          "purple": "Purple",
+          "red": "Red",
+          "yellow": "Yellow",
+          "custom": "Custom"
+        }
+      },
+      "radius": {
+        "description": "Border radius of cells",
+        "name": "Corner Radius"
+      },
+      "rectSize": {
+        "description": "Size of each day cell in pixels",
+        "name": "Cell Size"
+      },
+      "showLegend": {
+        "description": "Display color legend",
+        "name": "Show Legend"
+      },
+      "showMonthLabels": {
+        "description": "Display month labels",
+        "name": "Show Month Labels"
+      },
+      "showTooltip": {
+        "description": "Show tooltip on hover",
+        "name": "Show Tooltip"
+      },
+      "showWeekLabels": {
+        "description": "Display day of week labels",
+        "name": "Show Week Labels"
+      },
+      "space": {
+        "description": "Space between cells in pixels",
+        "name": "Cell Spacing"
+      },
+      "emptyColor": {
+        "description": "Color for days with value 0",
+        "name": "Empty Color"
+      },
+      "customColor": {
+        "description": "Base color for custom palette (other colors will be derived from this)",
+        "name": "Custom Color Theme"
+      },
+      "monthLabelMode": {
+        "description": "How to render month labels",
+        "name": "Month Label Mode",
+        "options": {
+          "default": "Default",
+          "number": "Number",
+          "custom": "Custom"
+        }
+      },
+      "monthLabelCustom": {
+        "description": "Comma-separated 12 labels, e.g. Jan,Feb,...,Dec",
+        "name": "Custom Month Labels"
+      },
+      "weekLabelMode": {
+        "description": "How to render week day labels",
+        "name": "Week Label Mode",
+        "options": {
+          "default": "Default",
+          "number": "Number",
+          "custom": "Custom"
+        }
+      },
+      "weekLabelCustom": {
+        "description": "Comma-separated 7 labels, e.g. Sun,Mon,...,Sat",
+        "name": "Custom Week Labels"
+      },
+      "weekStart": {
+        "description": "Choose on which day the week starts",
+        "name": "Week Start Day",
+        "options": {
+          "saturday": "Saturday",
+          "sunday": "Sunday",
+          "monday": "Monday"
+        }
+      }
+    }
+  }
+}
