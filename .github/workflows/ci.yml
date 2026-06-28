@@ -132,7 +132,7 @@ jobs:
     needs: build
     if: ${{ needs.build.outputs.has-e2e == 'true' }}
     outputs:
-      matrix: ${{ steps.resolve-versions.outputs.matrix }}
+      matrix: ${{ steps.filter-enterprise.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -144,6 +144,13 @@ jobs:
         uses: grafana/plugin-actions/e2e-version@e2e-version/v1.2.1
         with:
           skip-grafana-react-19-preview-image: false
+
+      - name: Filter out Enterprise images
+        id: filter-enterprise
+        run: |
+          sudo apt-get install -y jq
+          MATRIX=$(echo '${{ steps.resolve-versions.outputs.matrix }}' | jq '[.[] | select(.NAME | test("enterprise"; "i") | not)]')
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
 
   playwright-tests:
     needs: [resolve-versions, build]
