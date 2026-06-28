@@ -147,11 +147,13 @@ jobs:
 
   playwright-tests:
     needs: [resolve-versions, build]
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: read
       id-token: write
       pull-requests: write
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
     strategy:
       fail-fast: false
       matrix:
