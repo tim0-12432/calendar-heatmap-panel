@@ -25,12 +25,42 @@ function buildCustomLevels(base: string, theme: GrafanaTheme2): string[] {
   return theme.isDark ? [...levels].reverse() : levels;
 }
 
+// Linearly interpolate between two already-parsed rgb() strings at t in [0, 1].
+// t=0 returns `from`, t=1 returns `to`. Preserves alpha if either color has it.
+function interpolateRgb(from: string, to: string, t: number): string {
+  const a = colorManipulator.decomposeColor(from).values as number[];
+  const b = colorManipulator.decomposeColor(to).values as number[];
+
+  const rgb = [0, 1, 2].map((i) => Math.min(255, Math.max(0, Math.round(a[i] + (b[i] - a[i]) * t))));
+
+  return colorManipulator.recomposeColor({ type: 'rgb', values: rgb });
+}
+
+// build 'levelCount' shade levels by interpolating directly between an explicit
+// low color and an explicit high color. This is intentionally NOT reversed
+// for dark theme: the caller defined what "low" and "high" mean explicitly,
+// so that ordering is honored as-is regardless of theme.
+function buildGradient(lowRgb: string, highRgb: string, levelCount = 4): string[] {
+
+  if (levelCount < 1) {
+    return [];
+  }
+
+  if (lowRgb === highRgb || levelCount === 1) {
+    return Array(Math.max(1, levelCount)).fill(highRgb);
+  }
+
+  return Array.from({ length: levelCount }, (_, i) => interpolateRgb(lowRgb, highRgb, i / (levelCount - 1)));
+}
+
 export function getColorPalette(
   scheme: string,
   theme: GrafanaTheme2,
   maxCount: number,
   emptyColor?: string,
-  customColor?: string
+  customColor?: string,
+  gradientMinColor?: string,
+  gradientMaxColor?: string
 ): Record<number, string> {
   const defaultEmptyColor = parseColorToRgb(theme, emptyColor ?? '') || theme.colors.background.canvas;
   const supportedSchemes = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple']);
@@ -52,6 +82,12 @@ export function getColorPalette(
     const rgb = parseColorToRgb(theme, customColor ?? '');
     if (rgb) {
       colorLevels = buildCustomLevels(rgb, theme);
+    }
+  } else if (scheme === 'custom-gradient') {
+    const lowRgb = parseColorToRgb(theme, gradientMinColor ?? '');
+    const highRgb = parseColorToRgb(theme, gradientMaxColor ?? '');
+    if (lowRgb && highRgb) {
+      colorLevels = buildGradient(lowRgb, highRgb, safeMax);
     }
   }
 

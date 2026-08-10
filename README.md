@@ -184,15 +184,16 @@ ORDER BY toDate(timestamp);
 
 ### Color Schemes
 
-| Scheme | Description          | Typical Uses               |
-| ------ | -------------------- | -------------------------- |
-| Green  | Classic GitHub style | Activity, growth, success  |
-| Blue   | Calm and neutral     | Performance, efficiency    |
-| Red    | High-attention       | Errors, incidents          |
-| Yellow | Bright and energetic | Warnings, energy metrics   |
-| Purple | Distinctive accent   | Creative or custom metrics |
-| Orange | Warm and inviting    | Engagement, user activity  |
-| Custom | Customized scheme    |                            |
+| Scheme          | Description             | Typical Uses               |
+| ----------------| ------------------------| -------------------------- |
+| Green           | Classic GitHub style    | Activity, growth, success  |
+| Blue            | Calm and neutral        | Performance, efficiency    |
+| Red             | High-attention          | Errors, incidents          |
+| Yellow          | Bright and energetic    | Warnings, energy metrics   |
+| Purple          | Distinctive accent      | Creative or custom metrics |
+| Orange          | Warm and inviting       | Engagement, user activity  |
+| Custom          | Customized scheme       |                            |
+| Custom Gradient | Two-color gradient      | Temperature, sensor values |
 
 ### Aggregation Methods
 

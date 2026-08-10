@@ -102,6 +102,10 @@
         "description": "Basis Farbe für eigenes Schema (andere Farben werden davon abgeleitet)",
         "name": "Eigenes Farbschema"
       },
+      "customGradient": {
+        "description": "Benutzerdefinierter Farbverlauf, definiert durch zwei Farben",
+        "name": "Benutzerdefinierter Farberverlauf"
+      },
       "monthLabelMode": {
         "description": "Wie die Monatsbeschriftungen dargestellt werden",
         "name": "Art der Monatsbeschriftung",

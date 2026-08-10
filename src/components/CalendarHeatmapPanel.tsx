@@ -165,8 +165,8 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
   }, [heatmapData]);
 
   const colors = useMemo(() => {
-    return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor, options.customColor);
-  }, [options.colorScheme, options.emptyColor, options.customColor, theme, maxValue]);
+    return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor, options.customColor, options.gradientColorLow, options.gradientColorHigh);
+  }, [options.colorScheme, options.emptyColor, options.customColor, options.gradientColorLow, options.gradientColorHigh, theme, maxValue]);
 
   // Styles
   const styles = useMemo(
@@ -203,7 +203,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
 
         /* Correct week labels off placement */
         > text.w-heatmap-week {
-          transform: translateY(-${computedRectSize/2+options.space/2}px); 
+          transform: translateY(-${computedRectSize/2+options.space/2}px);
         }
       `,
       legend: css`
