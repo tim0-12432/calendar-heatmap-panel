@@ -226,7 +226,7 @@ jobs:
       #     retention-days: 5
 
   publish-report:
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && github.event.pull_request.head.repo.fork == false }}
     permissions:
       contents: write
       id-token: write
