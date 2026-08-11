@@ -125,13 +125,21 @@ describe('getColorPalette', () => {
 
   it('tests gradient generation', () => {
     const theme = createTheme({ isDark: true });
-
     const maxCount = 4;
     const redBlueGradient = getColorPalette('custom-gradient', theme, maxCount, '#000', undefined, '#0000ff', '#ff0000');
-    const expected = [ "rgb(0, 0, 255)", "rgb(85, 0, 170)", "rgb(170, 0, 85)", "rgb(255, 0, 0)", ]
+    const expected = [
+      "rgb(0, 0, 255)",
+      "rgb(28, 0, 227)",
+      "rgb(57, 0, 198)",
+      "rgb(85, 0, 170)",
+      "rgb(113, 0, 142)",
+      "rgb(142, 0, 113)",
+      "rgb(170, 0, 85)",
+      "rgb(198, 0, 57)",
+    ];
 
-    expect(Object.keys(redBlueGradient).length).toEqual(6);
-    expect([redBlueGradient[2], redBlueGradient[3], redBlueGradient[4], redBlueGradient[5]]).toEqual(expected);
+    expect(Object.keys(redBlueGradient).length).toEqual(12);
+    expect([redBlueGradient[2], redBlueGradient[3], redBlueGradient[4], redBlueGradient[5], redBlueGradient[6], redBlueGradient[7], redBlueGradient[8], redBlueGradient[9]]).toEqual(expected);
   });
 
 });

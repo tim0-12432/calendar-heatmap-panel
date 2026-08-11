@@ -36,23 +36,6 @@ function interpolateRgb(from: string, to: string, t: number): string {
   return colorManipulator.recomposeColor({ type: 'rgb', values: rgb });
 }
 
-// build 'levelCount' shade levels by interpolating directly between an explicit
-// low color and an explicit high color. This is intentionally NOT reversed
-// for dark theme: the caller defined what "low" and "high" mean explicitly,
-// so that ordering is honored as-is regardless of theme.
-function buildGradient(lowRgb: string, highRgb: string, levelCount = 4): string[] {
-
-  if (levelCount < 1) {
-    return [];
-  }
-
-  if (lowRgb === highRgb || levelCount === 1) {
-    return Array(Math.max(1, levelCount)).fill(highRgb);
-  }
-
-  return Array.from({ length: levelCount }, (_, i) => interpolateRgb(lowRgb, highRgb, i / (levelCount - 1)));
-}
-
 export function getColorPalette(
   scheme: string,
   theme: GrafanaTheme2,
@@ -74,7 +57,6 @@ export function getColorPalette(
   // Always expose 4 non-empty shades, regardless of maxCount, to keep the legend stable.
   // We generate strictly increasing *exclusive upper bounds* for the 4 shade buckets.
   const safeMax = Number.isFinite(maxCount) ? Math.max(0, Math.ceil(maxCount)) : 0;
-  const shadeQuantiles = [0.25, 0.5, 0.75, 1];
 
   // Choose 4 colors (either built-in or derived from customColor)
   let colorLevels: string[] | null = null;
@@ -87,7 +69,10 @@ export function getColorPalette(
     const lowRgb = parseColorToRgb(theme, gradientMinColor ?? '');
     const highRgb = parseColorToRgb(theme, gradientMaxColor ?? '');
     if (lowRgb && highRgb) {
-      colorLevels = buildGradient(lowRgb, highRgb, safeMax);
+      const gradientStepCount = 10;
+      // ensure low color is included in palette
+      const quantiles = Array.from({ length: gradientStepCount }, (_, i) => i / (gradientStepCount - 1));
+      colorLevels = quantiles.map((q) => interpolateRgb(lowRgb, highRgb, q));
     }
   }
 
@@ -102,6 +87,9 @@ export function getColorPalette(
 
     colorLevels = shades.map((shade) => theme.visualization.getColorByName(`${shade}-${nextHue}`));
   }
+
+  // build quantiles to match whatever colorLevels actually contains, for any scheme
+  const shadeQuantiles = Array.from({ length: colorLevels.length },(_, i) => (i + 1) / colorLevels.length);
 
   const palette: Record<number, string> = {
     0: defaultEmptyColor,
