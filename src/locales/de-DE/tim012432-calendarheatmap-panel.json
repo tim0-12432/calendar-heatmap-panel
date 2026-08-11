@@ -104,7 +104,7 @@
       },
       "customGradient": {
         "description": "Benutzerdefinierter Farbverlauf, definiert durch zwei Farben",
-        "name": "Benutzerdefinierter Farberverlauf"
+        "name": "Benutzerdefinierter Farbverlauf"
       },
       "monthLabelMode": {
         "description": "Wie die Monatsbeschriftungen dargestellt werden",

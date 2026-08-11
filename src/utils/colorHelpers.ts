@@ -26,7 +26,7 @@ function buildCustomLevels(base: string, theme: GrafanaTheme2): string[] {
 }
 
 // Linearly interpolate between two already-parsed rgb() strings at t in [0, 1].
-// t=0 returns `from`, t=1 returns `to`. Preserves alpha if either color has it.
+// t=0 returns 'from', t=1 returns 'to'.
 function interpolateRgb(from: string, to: string, t: number): string {
   const a = colorManipulator.decomposeColor(from).values as number[];
   const b = colorManipulator.decomposeColor(to).values as number[];
