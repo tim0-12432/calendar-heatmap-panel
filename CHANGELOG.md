@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Switched to pnpm** as a package management and build tool
+- **Switched to pnpm** as a package management tool
 
 ## [1.1.1] - 2026-05-03
 
