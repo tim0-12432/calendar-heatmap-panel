@@ -25,7 +25,7 @@ This project follows the [Contributor Covenant Code of Conduct](https://www.cont
 ### Prerequisites
 
 - Node.js ≥ 22 (LTS recommended)
-- npm (bundled with Node 22) or bun
+- pnpm 11.21.0
 - Docker (for running a local Grafana instance)
 - Git
 
@@ -37,13 +37,13 @@ https clone https://github.com/YOUR_USERNAME/calendar-heatmap-panel.git
 cd calendar-heatmap-panel
 
 # 2) Install dependencies
-npm install
+pnpm ci
 
 # 3) Start plugin dev server
-npm run dev
+pnpm dev
 
 # 4) Start Grafana in Docker (separate terminal)
-npm run server
+pnpm server
 ```
 
 Access Grafana at http://localhost:3000 (admin/admin).
@@ -74,23 +74,23 @@ Access Grafana at http://localhost:3000 (admin/admin).
 ### Commands
 
 ```bash
-npm run dev        # Hot reload development
-npm run build      # Production build
-npm run server     # Grafana + plugin in Docker
-npm run lint       # ESLint
-npm run lint:fix   # Autofix lint issues
-npm run typecheck  # TypeScript type checks
-npm run test       # Unit tests (watch)
-npm run test:ci    # Unit tests (CI)
-npm run e2e        # Playwright end-to-end
-npm run sign       # Sign plugin for distribution
+pnpm dev        # Hot reload development
+pnpm build      # Production build
+pnpm server     # Grafana + plugin in Docker
+pnpm lint       # ESLint
+pnpm lint:fix   # Autofix lint issues
+pnpm typecheck  # TypeScript type checks
+pnpm test       # Unit tests (watch)
+pnpm test:ci    # Unit tests (CI)
+pnpm e2e        # Playwright end-to-end
+pnpm sign       # Sign plugin for distribution
 ```
 
 ### Environment Variables
 
 ```bash
-GRAFANA_VERSION=11.6.0 npm run server  # Pin Grafana version
-GRAFANA_PORT=3001 npm run server       # Custom port
+GRAFANA_VERSION=11.6.0 pnpm server  # Pin Grafana version
+GRAFANA_PORT=3001 pnpm server       # Custom port
 ```
 
 ## 🏗️ Project Structure
