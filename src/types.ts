@@ -1,8 +1,10 @@
 export interface CalendarHeatmapOptions {
   // Colors
-  colorScheme: 'green' | 'blue' | 'red' | 'yellow' | 'purple' | 'orange' | 'custom';
+  colorScheme: 'green' | 'blue' | 'red' | 'yellow' | 'purple' | 'orange' | 'custom' | 'custom-gradient';
   emptyColor: string;
   customColor: string;
+  gradientColorLow: string;
+  gradientColorHigh: string;
 
   // Layout
   autoRectSize: boolean;

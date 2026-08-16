@@ -25,12 +25,25 @@ function buildCustomLevels(base: string, theme: GrafanaTheme2): string[] {
   return theme.isDark ? [...levels].reverse() : levels;
 }
 
+// Linearly interpolate between two already-parsed rgb() strings at t in [0, 1].
+// t=0 returns 'from', t=1 returns 'to'.
+function interpolateRgb(from: string, to: string, t: number): string {
+  const a = colorManipulator.decomposeColor(from).values as number[];
+  const b = colorManipulator.decomposeColor(to).values as number[];
+
+  const rgb = [0, 1, 2].map((i) => Math.min(255, Math.max(0, Math.round(a[i] + (b[i] - a[i]) * t))));
+
+  return colorManipulator.recomposeColor({ type: 'rgb', values: rgb });
+}
+
 export function getColorPalette(
   scheme: string,
   theme: GrafanaTheme2,
   maxCount: number,
   emptyColor?: string,
-  customColor?: string
+  customColor?: string,
+  gradientMinColor?: string,
+  gradientMaxColor?: string
 ): Record<number, string> {
   const defaultEmptyColor = parseColorToRgb(theme, emptyColor ?? '') || theme.colors.background.canvas;
   const supportedSchemes = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple']);
@@ -44,7 +57,6 @@ export function getColorPalette(
   // Always expose 4 non-empty shades, regardless of maxCount, to keep the legend stable.
   // We generate strictly increasing *exclusive upper bounds* for the 4 shade buckets.
   const safeMax = Number.isFinite(maxCount) ? Math.max(0, Math.ceil(maxCount)) : 0;
-  const shadeQuantiles = [0.25, 0.5, 0.75, 1];
 
   // Choose 4 colors (either built-in or derived from customColor)
   let colorLevels: string[] | null = null;
@@ -52,6 +64,15 @@ export function getColorPalette(
     const rgb = parseColorToRgb(theme, customColor ?? '');
     if (rgb) {
       colorLevels = buildCustomLevels(rgb, theme);
+    }
+  } else if (scheme === 'custom-gradient') {
+    const lowRgb = parseColorToRgb(theme, gradientMinColor ?? '');
+    const highRgb = parseColorToRgb(theme, gradientMaxColor ?? '');
+    if (lowRgb && highRgb) {
+      const gradientStepCount = 10;
+      // ensure low color is included in palette
+      const quantiles = Array.from({ length: gradientStepCount }, (_, i) => i / (gradientStepCount - 1));
+      colorLevels = quantiles.map((q) => interpolateRgb(lowRgb, highRgb, q));
     }
   }
 
@@ -66,6 +87,9 @@ export function getColorPalette(
 
     colorLevels = shades.map((shade) => theme.visualization.getColorByName(`${shade}-${nextHue}`));
   }
+
+  // build quantiles to match whatever colorLevels actually contains, for any scheme
+  const shadeQuantiles = Array.from({ length: colorLevels.length },(_, i) => (i + 1) / colorLevels.length);
 
   const palette: Record<number, string> = {
     0: defaultEmptyColor,
