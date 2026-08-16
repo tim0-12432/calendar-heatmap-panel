@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Switched to pnpm** as a package management tool
 
+TODO:
+- data links option + menu
+- option to use data timeframe
+- add suggestions supplier
+
 ## [1.1.1] - 2026-05-03
 
 ### Fixed
