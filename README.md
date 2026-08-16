@@ -43,7 +43,7 @@ A Grafana panel plugin that renders time-series data as an interactive calendar 
 ## 🔧 Requirements
 
 - Grafana **11.6.0+**
-- Node.js **22+** and npm for local development
+- Node.js **22+** and pnpm **11.21.0** for local development
 
 ## 🚀 Installation
 
@@ -72,8 +72,8 @@ Restart Grafana after installation.
 ```bash
 git clone https://github.com/tim0-12432/calendar-heatmap-panel.git
 cd calendar-heatmap-panel
-npm install
-npm run build
+pnpm ci
+pnpm build
 # Copy dist/ to your Grafana plugins directory
 ```
 
@@ -253,29 +253,29 @@ ORDER BY toDate(timestamp);
 ### Setup
 
 ```bash
-npm install
-npm run dev           # Hot reload for plugin code
-npm run server        # Launch Grafana in Docker with the plugin mounted
+pnpm ci
+pnpm dev           # Hot reload for plugin code
+pnpm server        # Launch Grafana in Docker with the plugin mounted
 ```
 
 ### Scripts
 
 ```bash
-npm run dev          # Start Vite/webpack dev workflow (hot reload)
-npm run build        # Production build
-npm run lint         # ESLint
-npm run lint:fix     # Autofix lint issues
-npm run typecheck    # TypeScript type checking
-npm run test         # Unit tests (watch)
-npm run test:ci      # Unit tests (CI mode)
-npm run e2e          # Playwright end-to-end tests
-npm run sign         # Sign plugin for distribution
+pnpm dev          # Start Vite/webpack dev workflow (hot reload)
+pnpm build        # Production build
+pnpm lint         # ESLint
+pnpm lint:fix     # Autofix lint issues
+pnpm typecheck    # TypeScript type checking
+pnpm test         # Unit tests (watch)
+pnpm test:ci      # Unit tests (CI mode)
+pnpm e2e          # Playwright end-to-end tests
+pnpm sign         # Sign plugin for distribution
 ```
 
 ### Packaging & Signing
 
-1. Run `npm run build` to generate `dist/`.
-2. Run `npm run sign` with your Grafana signature credentials configured.
+1. Run `pnpm build` to generate `dist/`.
+2. Run `pnpm sign` with your Grafana signature credentials configured.
 3. Copy or publish the signed bundle according to Grafana plugin distribution guidelines.
 
 ### Development Tips

@@ -1,0 +1,27 @@
+name: CVE Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check:
+    name: Check for CVEs in dependencies
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js and pnpm environment
+        uses: pnpm/setup@v2
+
+      - name: Check CVEs
+        run: pnpm audit --audit-level=high
