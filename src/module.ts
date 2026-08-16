@@ -3,10 +3,12 @@ import { CalendarHeatmapPanel } from './components/CalendarHeatmapPanel';
 import { CalendarHeatmapOptions } from './types';
 import { initPluginTranslations, t } from '@grafana/i18n';
 import pluginJson from './plugin.json';
+import { calendarHeatmapSuggestionSupplier } from 'utils/suggestionSupplier';
 
 await initPluginTranslations(pluginJson.id);
 
 export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPanel)
+  .setSuggestionsSupplier(calendarHeatmapSuggestionSupplier)
   .setPanelOptions((builder) => {
     return (
       builder
