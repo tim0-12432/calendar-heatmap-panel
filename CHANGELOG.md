@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Nothing yet.
+- **Custom Color Gradient** custom gradient defined by a start and end color
+
+### Changed
+
+- **Switched to pnpm** as a package management tool
 
 ## [1.1.1] - 2026-05-03
 

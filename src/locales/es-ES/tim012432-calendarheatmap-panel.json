@@ -102,6 +102,10 @@
         "description": "Color base para la paleta personalizada (otros colores se derivarán de este)",
         "name": "Tema de Color Personalizado"
       },
+      "customGradient": {
+        "description": "Degradado personalizado definido por dos colores",
+        "name": "Degradado personalizado"
+      },
       "monthLabelMode": {
         "description": "Cómo renderizar las etiquetas de los meses",
         "name": "Modo de Etiqueta de Mes",

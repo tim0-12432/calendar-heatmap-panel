@@ -27,6 +27,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
               { value: 'purple', label: t('panel.options.colorScheme.options.purple', 'Purple') },
               { value: 'orange', label: t('panel.options.colorScheme.options.orange', 'Orange') },
               { value: 'custom', label: t('panel.options.colorScheme.options.custom', 'Custom') },
+              { value: 'custom-gradient', label: t('panel.options.colorScheme.options.custom-gradient', 'Custom Gradient') },
             ],
           },
         })
@@ -40,6 +41,30 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           defaultValue: '#22c55e',
           category: ['Colors'],
           showIf: (options) => options.colorScheme === 'custom',
+        })
+
+        // color gradient
+        .addColorPicker({
+          path: 'gradientColorLow',
+          name: t('panel.options.gradientColorLow.name', 'Gradient start color'),
+          description: t(
+            'panel.options.gradientColorLow.description',
+            'Color used for lowest values in the gradient'
+          ),
+          defaultValue: '#3b82f6',
+          category: ['Colors'],
+          showIf: (options) => options.colorScheme === 'custom-gradient',
+        })
+        .addColorPicker({
+          path: 'gradientColorHigh',
+          name: t('panel.options.gradientColorHigh.name', 'Gradient end color'),
+          description: t(
+            'panel.options.gradientColorHigh.description',
+            'Color used for the higherst values in the gradient'
+          ),
+          defaultValue: '#ef4444',
+          category: ['Colors'],
+          showIf: (options) => options.colorScheme === 'custom-gradient',
         })
         .addColorPicker({
           path: 'emptyColor',

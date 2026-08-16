@@ -163,8 +163,26 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
   }, [heatmapData]);
 
   const colors = useMemo(() => {
-    return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor, options.customColor);
-  }, [options.colorScheme, options.emptyColor, options.customColor, theme, maxValue]);
+    return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor, options.customColor, options.gradientColorLow, options.gradientColorHigh);
+  }, [options.colorScheme, options.emptyColor, options.customColor, options.gradientColorLow, options.gradientColorHigh, theme, maxValue]);
+
+  // sample equally from color palette, making sure to include first and last element
+  const legendEntries = useMemo(() => {
+    const entries = Object.entries(colors)
+      .map(([key, color]) => [Number(key), color] as const)
+      .filter(([key]) => !Number.isNaN(key) && key !== 0 && key !== 1)
+      .sort(([a], [b]) => a - b);
+
+    const legendColorCount = 4;
+    if (entries.length <= legendColorCount) {
+      return entries;
+    }
+
+    return Array.from({ length: legendColorCount }, (_, i) => {
+      const idx = Math.round((i * (entries.length - 1)) / (legendColorCount - 1));
+      return entries[idx];
+    });
+  }, [colors]);
 
   // Styles
   const styles = useMemo(
@@ -317,11 +335,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
       {options.showLegend && (
         <div className={styles.legend}>
           <span>{t('panel.component.legend.less', 'Less')}</span>
-          {Object.entries(colors)
-            .map(([key, color]) => [Number(key), color] as const)
-            .filter(([key]) => !Number.isNaN(key) && key !== 1)
-            .sort(([a], [b]) => a - b)
-            .map(([key, color]) => (
+            {legendEntries.map(([key, color]) => (
               <div
                 key={key}
                 className={styles.legendRect}

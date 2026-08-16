@@ -17,7 +17,7 @@ jobs:
     # env:
     #   GRAFANA_PLUGIN_ROOT_URLS: https://grafana.com
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
