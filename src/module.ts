@@ -8,7 +8,7 @@ import { calendarHeatmapSuggestionSupplier } from 'utils/suggestionSupplier';
 await initPluginTranslations(pluginJson.id);
 
 export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPanel)
-  .setSuggestionsSupplier(calendarHeatmapSuggestionSupplier)
+  .setSuggestionsSupplier(calendarHeatmapSuggestionSupplier as any)
   .setPanelOptions((builder) => {
     return (
       builder
