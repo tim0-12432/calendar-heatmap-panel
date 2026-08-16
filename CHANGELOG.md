@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2026-08-xx
 
 ### Added
 
@@ -178,7 +178,8 @@ TODO:
 - **Lazy loading** of non-critical components to improve initial load times
 - **Memory-efficient** data structures preventing memory leaks in long-running dashboards
 
-[unreleased]: https://github.com/tim0-12432/calendar-heatmap-panel/compare/v1.1.1...HEAD
+[unreleased]: https://github.com/tim0-12432/calendar-heatmap-panel/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/tim0-12432/calendar-heatmap-panel/releases/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/tim0-12432/calendar-heatmap-panel/releases/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/tim0-12432/calendar-heatmap-panel/releases/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/tim0-12432/calendar-heatmap-panel/releases/compare/v1.0.3...v1.0.4
