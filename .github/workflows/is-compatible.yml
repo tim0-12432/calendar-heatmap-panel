@@ -5,6 +5,7 @@ jobs:
   compatibilitycheck:
     runs-on: ubuntu-latest
     permissions:
+      pull-requests: write
       contents: read
     steps:
       - uses: actions/checkout@v7
@@ -27,5 +28,5 @@ jobs:
         uses: grafana/plugin-actions/is-compatible@is-compatible/v1.0.3
         with:
           module: ${{ steps.find-module-ts.outputs.modulets }}
-          comment-pr: 'no'
-          fail-if-incompatible: 'yes'
+          comment-pr: 'yes'
+          fail-if-incompatible: 'no'
