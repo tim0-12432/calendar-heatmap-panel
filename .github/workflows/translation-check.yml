@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'src/**'
-      - 'locales/**'
   push:
     branches:
       - main
@@ -14,7 +13,6 @@ on:
       - 'v*'
     paths:
       - 'src/**'
-      - 'locales/**'
 
 jobs:
   check-translations:
@@ -55,14 +53,14 @@ jobs:
            * Matches t('key') and t("key") where the key starts with 'panel.'.
            */
           function extractKeys(content) {
-            const regex = /t\(['"]([^'"]+)['"]\)/g;
+            // Matches t('…'), t("…"), t(`…`)  — the captured group is the key
+            const regex = /t\(['"`]([^'"`]+)['"`][^)]*\)/g;
             const keys = [];
             let match;
             while ((match = regex.exec(content)) !== null) {
-              const key = match[1];
-              if (key.startsWith('panel.')) {
-                keys.push(key);
-              }
+                if (match[1]?.startsWith('panel.')) {
+                keys.push(match[1]);
+                }
             }
             return keys;
           }
@@ -85,11 +83,11 @@ jobs:
 
           // ---------------------------------------------------------------
           const sourceDir = 'src';
-          const localeFiles = [
-            'locales/de-DE/tim012432-calendarheatmap-panel.json',
-            'locales/en-US/tim012432-calendarheatmap-panel.json',
-            'locales/es-ES/tim012432-calendarheatmap-panel.json'
-          ];
+          const localeDir = 'src/locales';
+          const localeFiles = fs.readdirSync(localeDir, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => path.join(localeDir, dirent.name, 'tim012432-calendarheatmap-panel.json'))
+            .filter(fs.existsSync);
 
           // Gather all source files
           const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
