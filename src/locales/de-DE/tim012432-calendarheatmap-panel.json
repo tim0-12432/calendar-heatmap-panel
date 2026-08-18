@@ -36,6 +36,13 @@
       }
     },
     "options": {
+      "categories": {
+        "colors": "Farben",
+        "layout": "Layout",
+        "labels": "Beschriftungen",
+        "data": "Daten",
+        "interaction": "Interaktion"
+      },
       "aggregation": {
         "description": "Wie mehrere Datenpunkte am selben Tag aggregiert werden",
         "name": "Aggregation",
@@ -63,7 +70,8 @@
           "purple": "Lila",
           "red": "Rot",
           "yellow": "Gelb",
-          "custom": "Benutzerdefiniert"
+          "custom": "Benutzerdefiniert",
+          "customGradient": "Benutzerdefinierter Farbverlauf"
         }
       },
       "radius": {
@@ -106,6 +114,14 @@
         "description": "Benutzerdefinierter Farbverlauf, definiert durch zwei Farben",
         "name": "Benutzerdefinierter Farbverlauf"
       },
+      "gradientColorLow": {
+        "description": "Farbe für die niedrigsten Werte im Farbverlauf",
+        "name": "Verlaufsfarbe niedrig"
+      },
+      "gradientColorHigh": {
+        "description": "Farbe für die höchsten Werte im Farbverlauf",
+        "name": "Verlaufsfarbe hoch"
+      },
       "monthLabelMode": {
         "description": "Wie die Monatsbeschriftungen dargestellt werden",
         "name": "Art der Monatsbeschriftung",
@@ -140,6 +156,10 @@
           "sunday": "Sonntag",
           "monday": "Montag"
         }
+      },
+      "enableDataLinks": {
+        "description": "Zellen klickbar machen, wenn Datenlinks auf dem Feld konfiguriert sind",
+        "name": "Datenlinks aktivieren"
       }
     }
   }

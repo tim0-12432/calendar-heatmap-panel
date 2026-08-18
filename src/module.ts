@@ -26,6 +26,13 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
   })
   .setSuggestionsSupplier(calendarHeatmapSuggestionSupplier as any) // because of deprecation interference 12.x/13.x
   .setPanelOptions((builder) => {
+    const Categories = {
+      Colors: t('panel.options.categories.colors', 'Colors'),
+      Layout: t('panel.options.categories.layout', 'Layout'),
+      Labels: t('panel.options.categories.labels', 'Labels'),
+      Data: t('panel.options.categories.data', 'Data'),
+      Interaction: t('panel.options.categories.interaction', 'Interaction'),
+    };
     return (
       builder
         // Color settings
@@ -34,7 +41,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           name: t('panel.options.colorScheme.name', 'Color Scheme'),
           description: t('panel.options.colorScheme.description', 'Color palette for the heatmap'),
           defaultValue: 'green',
-          category: ['Colors'],
+          category: [Categories.Colors],
           settings: {
             options: [
               { value: 'green', label: t('panel.options.colorScheme.options.green', 'Green') },
@@ -44,7 +51,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
               { value: 'purple', label: t('panel.options.colorScheme.options.purple', 'Purple') },
               { value: 'orange', label: t('panel.options.colorScheme.options.orange', 'Orange') },
               { value: 'custom', label: t('panel.options.colorScheme.options.custom', 'Custom') },
-              { value: 'custom-gradient', label: t('panel.options.colorScheme.options.custom-gradient', 'Custom Gradient') },
+              { value: 'custom-gradient', label: t('panel.options.colorScheme.options.customGradient', 'Custom Gradient') },
             ],
           },
         })
@@ -56,38 +63,36 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
             'Base color for custom palette (other colors will be derived from this)'
           ),
           defaultValue: '#22c55e',
-          category: ['Colors'],
+          category: [Categories.Colors],
           showIf: (options) => options.colorScheme === 'custom',
         })
-
-        // color gradient
         .addColorPicker({
           path: 'gradientColorLow',
-          name: t('panel.options.gradientColorLow.name', 'Gradient start color'),
+          name: t('panel.options.gradientColorLow.name', 'Gradient Low Color'),
           description: t(
             'panel.options.gradientColorLow.description',
             'Color used for lowest values in the gradient'
           ),
           defaultValue: '#3b82f6',
-          category: ['Colors'],
+          category: [Categories.Colors],
           showIf: (options) => options.colorScheme === 'custom-gradient',
         })
         .addColorPicker({
           path: 'gradientColorHigh',
-          name: t('panel.options.gradientColorHigh.name', 'Gradient end color'),
+          name: t('panel.options.gradientColorHigh.name', 'Gradient High Color'),
           description: t(
             'panel.options.gradientColorHigh.description',
-            'Color used for the higherst values in the gradient'
+            'Color used for the highest values in the gradient'
           ),
           defaultValue: '#ef4444',
-          category: ['Colors'],
+          category: [Categories.Colors],
           showIf: (options) => options.colorScheme === 'custom-gradient',
         })
         .addColorPicker({
           path: 'emptyColor',
           name: t('panel.options.emptyColor.name', 'Empty Color'),
           description: t('panel.options.emptyColor.description', 'Color for days with value 0'),
-          category: ['Colors'],
+          category: [Categories.Colors],
         })
 
         // Layout settings
@@ -96,14 +101,14 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           name: t('panel.options.autoRectSize.name', 'Auto Cell Size'),
           description: t('panel.options.autoRectSize.description', 'Automatically fit cells to the panel width'),
           defaultValue: true,
-          category: ['Layout'],
+          category: [Categories.Layout],
         })
         .addSliderInput({
           path: 'rectSize',
           name: t('panel.options.rectSize.name', 'Cell Size'),
           description: t('panel.options.rectSize.description', 'Size of each day cell in pixels'),
           defaultValue: 11,
-          category: ['Layout'],
+          category: [Categories.Layout],
           settings: {
             min: 8,
             max: 64,
@@ -116,7 +121,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           name: t('panel.options.space.name', 'Cell Spacing'),
           description: t('panel.options.space.description', 'Space between cells in pixels'),
           defaultValue: 3,
-          category: ['Layout'],
+          category: [Categories.Layout],
           settings: {
             min: 1,
             max: 24,
@@ -128,7 +133,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           name: t('panel.options.radius.name', 'Corner Radius'),
           description: t('panel.options.radius.description', 'Border radius of cells'),
           defaultValue: 2,
-          category: ['Layout'],
+          category: [Categories.Layout],
           settings: {
             min: 0,
             max: 16,
@@ -142,21 +147,21 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           name: t('panel.options.showLegend.name', 'Show Legend'),
           description: t('panel.options.showLegend.description', 'Display color legend'),
           defaultValue: true,
-          category: ['Labels'],
+          category: [Categories.Labels],
         })
         .addBooleanSwitch({
           path: 'showMonthLabels',
           name: t('panel.options.showMonthLabels.name', 'Show Month Labels'),
           description: t('panel.options.showMonthLabels.description', 'Display month labels'),
           defaultValue: true,
-          category: ['Labels'],
+          category: [Categories.Labels],
         })
         .addRadio({
           path: 'monthLabelMode',
           name: t('panel.options.monthLabelMode.name', 'Month Label Mode'),
           description: t('panel.options.monthLabelMode.description', 'How to render month labels'),
           defaultValue: 'default',
-          category: ['Labels'],
+          category: [Categories.Labels],
           settings: {
             options: [
               { value: 'default', label: t('panel.options.monthLabelMode.options.default', 'Default') },
@@ -174,7 +179,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
             'Comma-separated 12 labels, e.g. Jan,Feb,...,Dec'
           ),
           defaultValue: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
-          category: ['Labels'],
+          category: [Categories.Labels],
           showIf: (o) => o.showMonthLabels && o.monthLabelMode === 'custom',
         })
         .addRadio({
@@ -182,7 +187,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           name: t('panel.options.weekStart.name', 'Week Start Day'),
           description: t('panel.options.weekStart.description', 'Choose on which day the week starts'),
           defaultValue: 'sunday',
-          category: ['Labels'],
+          category: [Categories.Labels],
           settings: {
             options: [
               { value: 'saturday', label: t('panel.options.weekStart.options.saturday', 'Saturday') },
@@ -196,14 +201,14 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           name: t('panel.options.showWeekLabels.name', 'Show Week Labels'),
           description: t('panel.options.showWeekLabels.description', 'Display day of week labels'),
           defaultValue: true,
-          category: ['Labels'],
+          category: [Categories.Labels],
         })
         .addRadio({
           path: 'weekLabelMode',
           name: t('panel.options.weekLabelMode.name', 'Week Label Mode'),
           description: t('panel.options.weekLabelMode.description', 'How to render week day labels'),
           defaultValue: 'default',
-          category: ['Labels'],
+          category: [Categories.Labels],
           settings: {
             options: [
               { value: 'default', label: t('panel.options.weekLabelMode.options.default', 'Default') },
@@ -218,7 +223,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           name: t('panel.options.weekLabelCustom.name', 'Custom Week Labels'),
           description: t('panel.options.weekLabelCustom.description', 'Comma-separated 7 labels, e.g. Sun,Mon,...,Sat'),
           defaultValue: 'Sun,Mon,Tue,Wed,Thu,Fri,Sat',
-          category: ['Labels'],
+          category: [Categories.Labels],
           showIf: (o) => o.showWeekLabels && o.weekLabelMode === 'custom',
         })
 
@@ -231,7 +236,7 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
             'How to aggregate multiple data points on the same day'
           ),
           defaultValue: 'sum',
-          category: ['Data'],
+          category: [Categories.Data],
           settings: {
             options: [
               { value: 'sum', label: t('panel.options.aggregation.options.sum', 'Sum') },
@@ -251,17 +256,17 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           name: t('panel.options.showTooltip.name', 'Show Tooltip'),
           description: t('panel.options.showTooltip.description', 'Show tooltip on hover'),
           defaultValue: true,
-          category: ['Interaction'],
+          category: [Categories.Interaction],
         })
         .addBooleanSwitch({
           path: 'enableDataLinks',
-          name: t('panel.options.enableDataLinks.name', 'Enable data links'),
+          name: t('panel.options.enableDataLinks.name', 'Enable Data Links'),
           description: t(
             'panel.options.enableDataLinks.description',
             'Make cells clickable when data links are configured on the field'
           ),
           defaultValue: true,
-          category: ['Interaction'],
+          category: [Categories.Interaction],
         })
     );
   })

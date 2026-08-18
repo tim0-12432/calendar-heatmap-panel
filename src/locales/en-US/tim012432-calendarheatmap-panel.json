@@ -36,6 +36,13 @@
       }
     },
     "options": {
+      "categories": {
+        "colors": "Colors",
+        "layout": "Layout",
+        "labels": "Labels",
+        "data": "Data",
+        "interaction": "Interaction"
+      },
       "aggregation": {
         "description": "How to aggregate multiple data points on the same day",
         "name": "Aggregation",
@@ -63,7 +70,8 @@
           "purple": "Purple",
           "red": "Red",
           "yellow": "Yellow",
-          "custom": "Custom"
+          "custom": "Custom",
+          "customGradient": "Custom Gradient"
         }
       },
       "radius": {
@@ -106,6 +114,14 @@
         "description": "Custom gradient defined by two colors",
         "name": "Custom Gradient"
       },
+      "gradientColorLow": {
+        "description": "Color used for lowest values in the gradient",
+        "name": "Gradient Low Color"
+      },
+      "gradientColorHigh": {
+        "description": "Color used for the highest values in the gradient",
+        "name": "Gradient High Color"
+      },
       "monthLabelMode": {
         "description": "How to render month labels",
         "name": "Month Label Mode",
@@ -140,6 +156,10 @@
           "sunday": "Sunday",
           "monday": "Monday"
         }
+      },
+      "enableDataLinks": {
+        "description": "Make cells clickable when data links are configured on the field",
+        "name": "Enable Data Links"
       }
     }
   }

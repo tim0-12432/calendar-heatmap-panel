@@ -11,13 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Custom Color Gradient** custom gradient defined by a start and end color
 - **SuggestionSupplier** for getting heatmap panel recommended as suggested visualization
+- **Support for Data Links**: opens when clicking on a cell (uses context menu when multiple data links are configured)
 
 ### Changed
 
 - **Switched to pnpm** as a package management tool
 
 TODO:
-- data links option + menu
 - option to use data timeframe
 
 ## [1.1.1] - 2026-05-03
