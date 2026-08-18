@@ -160,6 +160,10 @@
       "enableDataLinks": {
         "description": "Zellen klickbar machen, wenn Datenlinks auf dem Feld konfiguriert sind",
         "name": "Datenlinks aktivieren"
+      },
+      "conversionUnit": {
+        "description": "Einheit für die Umrechnung",
+        "name": "Einheit"
       }
     }
   }

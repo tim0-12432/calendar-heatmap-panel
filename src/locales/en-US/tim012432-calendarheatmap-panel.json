@@ -160,6 +160,10 @@
       "enableDataLinks": {
         "description": "Make cells clickable when data links are configured on the field",
         "name": "Enable Data Links"
+      },
+      "conversionUnit": {
+        "description": "Choose a unit for conversion",
+        "name": "Unit"
       }
     }
   }

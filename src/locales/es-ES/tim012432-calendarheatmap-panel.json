@@ -160,6 +160,10 @@
       "enableDataLinks": {
         "description": "Hacer que las celdas sean clicables cuando los enlaces de datos están configurados en el campo",
         "name": "Habilitar Enlaces de Datos"
+      },
+      "conversionUnit": {
+        "description": "Elegir una unidad para la conversión",
+        "name": "Unidad"
       }
     }
   }
