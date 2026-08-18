@@ -33,6 +33,7 @@ export interface CalendarHeatmapOptions {
 
   // Data
   aggregation: 'sum' | 'count' | 'avg' | 'max' | 'min' | 'last' | 'first';
+  conversionUnit: string;
 
   // Interaction
   showTooltip: boolean;

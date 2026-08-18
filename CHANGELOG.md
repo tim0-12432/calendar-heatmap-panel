@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Visualization Suggestions**: Added support for recommending Calendar Heatmap for compatible time-and-number data
 - **Data Links**: Cells can be clicked to open configured data links; when multiple links are available, Grafana displays a context menu
 - **Data-link Variables**: Added `__rect.value` for the aggregated value and `__rect.date` for the cell date in `YYYY-MM-DD` format
+- **Unit conversion** including all standard Grafana units
 
 ### Changed
 

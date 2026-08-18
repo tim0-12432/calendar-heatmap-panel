@@ -249,6 +249,12 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
             ],
           },
         })
+        .addUnitPicker({
+          path: 'conversionUnit',
+          name: t('panel.options.conversionUnit.name', 'Conversion Unit'),
+          description: t('panel.options.conversionUnit.description', 'Choose a unit for conversion'),
+          category: [Categories.Data],
+        })
 
         // Interaction
         .addBooleanSwitch({

@@ -16,6 +16,7 @@ import {
 } from '../utils/dateHelpers';
 import { css } from '@emotion/css';
 import { t } from '@grafana/i18n';
+import { formatValue } from '../utils/unitHelpers';
 
 interface Props extends PanelProps<CalendarHeatmapOptions> {}
 
@@ -349,7 +350,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
           const originalCount = countByOriginalDate.get(typedCell.originalDate);
           const tooltipContent =
             originalCount !== undefined
-              ? `${date}: ${originalCount.toLocaleString()}`
+              ? `${date}: ${formatValue(originalCount, options.conversionUnit)}`
               : `${date}: ${t('panel.component.tooltip.noData', 'No data')}`;
           const getLinks = linksByOriginalDate.get(typedCell.originalDate);
           const fieldConfig = fieldConfigByOriginalDate.get(typedCell.originalDate) ?? {};
@@ -403,7 +404,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
           <span>{t('panel.component.legend.more', 'More')}</span>
           {maxValue > 0 && (
             <span style={{ marginLeft: 8 }}>
-              ({t('panel.component.legend.max', 'Max')}: {maxValue.toLocaleString()})
+              ({t('panel.component.legend.max', 'Max')}: {formatValue(maxValue, options.conversionUnit)})
             </span>
           )}
         </div>
