@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { FieldConfig, LinkModel, PanelProps } from '@grafana/data';
+import React, { useCallback, useMemo } from 'react';
+import { DataFrame, Field, FieldConfig, getLinksSupplier, LinkModel, PanelProps } from '@grafana/data';
 import { useTheme2, Tooltip, DataLinksContextMenu } from '@grafana/ui';
 import HeatMap from '@uiw/react-heat-map';
 import { CalendarHeatmapOptions, HeatmapValue } from '../types';
@@ -51,7 +51,7 @@ function getDefaultNumberOrCustom(
   return defaultLabels;
 }
 
-export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, options, timeRange, timeZone, title }) => {
+export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, options, timeRange, timeZone, title, replaceVariables }) => {
   const theme = useTheme2();
 
   const ContextMenu = DataLinksContextMenu as React.FC<{
@@ -192,21 +192,59 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
     });
   }, [colors]);
 
+  const getLinksForCell = useCallback(
+    (
+      frame: DataFrame,
+      field: Field<any>,
+      tile: HeatmapValue
+    ): LinkModel[] => {
+      const scopedVars = {
+      ...(field.state?.scopedVars ?? {}),
+      '__rect': {
+        value: {
+          value: tile.count,
+          date: tile.originalDate.replaceAll('/', '-'),
+        },
+        text: String(tile.count),
+      },
+    };
+    const getLinks = getLinksSupplier(
+      frame,
+      field,
+      scopedVars,
+      replaceVariables,
+      timeZone
+    );
+    return getLinks({
+      valueRowIndex: tile.rowIndex,
+    });
+  }, [replaceVariables, timeZone]);
+
   const linksByOriginalDate = useMemo(() => {
     const m = new Map<string, () => LinkModel[]>();
     for (const d of heatmapData) {
-      if (d.frameIndex === undefined || d.fieldIndex === undefined || d.rowIndex === undefined) {
+      if (
+        d.frameIndex === undefined ||
+        d.fieldIndex === undefined ||
+        d.rowIndex === undefined
+      ) {
         continue;
       }
+      const frame = data.series[d.frameIndex];
       const field = data.series[d.frameIndex]?.fields[d.fieldIndex];
-      if (!field?.getLinks || !field.config.links?.length) {
+      if (!frame || !field?.config.links?.length) {
         continue;
       }
-      const rowIndex = d.rowIndex;
-      m.set(d.originalDate, () => field.getLinks!({ valueRowIndex: rowIndex }));
+      m.set(d.originalDate, () => {
+        return getLinksForCell(
+          frame,
+          field,
+          d
+        );
+      });
     }
     return m;
-  }, [heatmapData, data.series]);
+  }, [heatmapData, data.series, getLinksForCell]);
 
   const fieldConfigByOriginalDate = useMemo(() => {
     const m = new Map<string, FieldConfig>();

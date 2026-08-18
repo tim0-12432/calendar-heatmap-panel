@@ -9,13 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Custom Color Gradient** custom gradient defined by a start and end color
-- **SuggestionSupplier** for getting heatmap panel recommended as suggested visualization
-- **Support for Data Links**: opens when clicking on a cell (uses context menu when multiple data links are configured)
+- **Custom Color Gradient**: Added a configurable gradient between low and high colors
+- **Visualization Suggestions**: Added support for recommending Calendar Heatmap for compatible time-and-number data
+- **Data Links**: Cells can be clicked to open configured data links; when multiple links are available, Grafana displays a context menu
+- **Data-link Variables**: Added `__rect.value` for the aggregated value and `__rect.date` for the cell date in `YYYY-MM-DD` format
 
 ### Changed
 
-- **Switched to pnpm** as a package management tool
+- **Package manager**: Migrated the project to pnpm
 
 TODO:
 - option to use data timeframe
