@@ -36,10 +36,17 @@ export interface CalendarHeatmapOptions {
 
   // Interaction
   showTooltip: boolean;
+  enableDataLinks: boolean;
 }
 
 export interface HeatmapValue {
   date: string;
-  originalDate: string;
   count: number;
+  originalDate: string;
+  /** Index of the representative row in the source frame */
+  rowIndex?: number;
+  /** Index of the frame in data.series */
+  frameIndex?: number;
+  /** Index of the value field within that frame */
+  fieldIndex?: number;
 }

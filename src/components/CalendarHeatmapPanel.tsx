@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { PanelProps } from '@grafana/data';
-import { useTheme2, Tooltip } from '@grafana/ui';
+import { FieldConfig, LinkModel, PanelProps } from '@grafana/data';
+import { useTheme2, Tooltip, DataLinksContextMenu } from '@grafana/ui';
 import HeatMap from '@uiw/react-heat-map';
 import { CalendarHeatmapOptions, HeatmapValue } from '../types';
 import { processTimeSeriesData } from '../utils/dataProcessor';
@@ -53,6 +53,12 @@ function getDefaultNumberOrCustom(
 
 export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, options, timeRange, timeZone, title }) => {
   const theme = useTheme2();
+
+  const ContextMenu = DataLinksContextMenu as React.FC<{
+    links: () => LinkModel[];
+    config: FieldConfig;
+    children: (api: { openMenu: React.MouseEventHandler<HTMLElement> }) => React.ReactNode;
+  }>;
 
   const heatmapData = useMemo(() => {
     return processTimeSeriesData(data.series, options.aggregation, timeZone);
@@ -186,6 +192,36 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
     });
   }, [colors]);
 
+  const linksByOriginalDate = useMemo(() => {
+    const m = new Map<string, () => LinkModel[]>();
+    for (const d of heatmapData) {
+      if (d.frameIndex === undefined || d.fieldIndex === undefined || d.rowIndex === undefined) {
+        continue;
+      }
+      const field = data.series[d.frameIndex]?.fields[d.fieldIndex];
+      if (!field?.getLinks || !field.config.links?.length) {
+        continue;
+      }
+      const rowIndex = d.rowIndex;
+      m.set(d.originalDate, () => field.getLinks!({ valueRowIndex: rowIndex }));
+    }
+    return m;
+  }, [heatmapData, data.series]);
+
+  const fieldConfigByOriginalDate = useMemo(() => {
+    const m = new Map<string, FieldConfig>();
+    for (const d of heatmapData) {
+      if (d.frameIndex === undefined || d.fieldIndex === undefined) {
+        continue;
+      }
+      const field = data.series[d.frameIndex]?.fields[d.fieldIndex];
+      if (field) {
+        m.set(d.originalDate, field.config);
+      }
+    }
+    return m;
+  }, [heatmapData, data.series]);
+
   // Styles
   const styles = useMemo(
     () => ({
@@ -277,15 +313,40 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
             originalCount !== undefined
               ? `${date}: ${originalCount.toLocaleString()}`
               : `${date}: ${t('panel.component.tooltip.noData', 'No data')}`;
+          const getLinks = linksByOriginalDate.get(typedCell.originalDate);
+          const fieldConfig = fieldConfigByOriginalDate.get(typedCell.originalDate) ?? {};
+          const hasLinks = options.enableDataLinks !== false && Boolean(getLinks);
 
-          if (!options.showTooltip) {
-            return <rect {...props} rx={options.radius} />;
+          const rect = (extra?: { onClick?: React.MouseEventHandler<SVGRectElement> }) => (
+            <rect
+              {...props}
+              rx={options.radius}
+              onClick={extra?.onClick}
+              style={hasLinks ? { ...props.style, cursor: 'pointer' } : props.style}
+            />
+          );
+
+          const withTooltip = (child: React.ReactElement) =>
+            options.showTooltip ? (
+              <Tooltip content={tooltipContent} placement="top">
+                {child}
+              </Tooltip>
+            ) : (
+              child
+            );
+
+          if (!hasLinks) {
+            return withTooltip(rect());
           }
 
           return (
-            <Tooltip content={tooltipContent} placement="top">
-              <rect {...props} rx={options.radius} />
-            </Tooltip>
+            <ContextMenu links={getLinks!} config={fieldConfig}>
+              {(api) => (
+                <g onClick={api.openMenu as unknown as React.MouseEventHandler<SVGGElement>} style={{ cursor: 'pointer' }}>
+                  { withTooltip(rect()) }
+                </g>
+              )}
+            </ContextMenu>
           );
         }}
       />

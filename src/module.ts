@@ -1,4 +1,4 @@
-import { PanelPlugin } from '@grafana/data';
+import { FieldConfigProperty, PanelPlugin } from '@grafana/data';
 import { CalendarHeatmapPanel } from './components/CalendarHeatmapPanel';
 import { CalendarHeatmapOptions } from './types';
 import { initPluginTranslations, t } from '@grafana/i18n';
@@ -8,7 +8,23 @@ import { calendarHeatmapSuggestionSupplier } from 'utils/suggestionSupplier';
 await initPluginTranslations(pluginJson.id);
 
 export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPanel)
-  .setSuggestionsSupplier(calendarHeatmapSuggestionSupplier as any)
+  .useFieldConfig({
+    standardOptions: {
+      [FieldConfigProperty.Links]: {},
+      [FieldConfigProperty.Thresholds]: { hideFromDefaults: true },
+      [FieldConfigProperty.Mappings]: { hideFromDefaults: true },
+      [FieldConfigProperty.Unit]: { hideFromDefaults: true },
+      [FieldConfigProperty.Color]: { hideFromDefaults: true },
+      [FieldConfigProperty.Decimals]: { hideFromDefaults: true },
+      [FieldConfigProperty.FieldMinMax]: { hideFromDefaults: true },
+      [FieldConfigProperty.Min]: { hideFromDefaults: true },
+      [FieldConfigProperty.Max]: { hideFromDefaults: true },
+      [FieldConfigProperty.Filterable]: { hideFromDefaults: true },
+      [FieldConfigProperty.NoValue]: { hideFromDefaults: true },
+      [FieldConfigProperty.DisplayName]: { hideFromDefaults: true },
+    }
+  })
+  .setSuggestionsSupplier(calendarHeatmapSuggestionSupplier as any) // because of deprecation interference 12.x/13.x
   .setPanelOptions((builder) => {
     return (
       builder
@@ -234,6 +250,16 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           path: 'showTooltip',
           name: t('panel.options.showTooltip.name', 'Show Tooltip'),
           description: t('panel.options.showTooltip.description', 'Show tooltip on hover'),
+          defaultValue: true,
+          category: ['Interaction'],
+        })
+        .addBooleanSwitch({
+          path: 'enableDataLinks',
+          name: t('panel.options.enableDataLinks.name', 'Enable data links'),
+          description: t(
+            'panel.options.enableDataLinks.description',
+            'Make cells clickable when data links are configured on the field'
+          ),
           defaultValue: true,
           category: ['Interaction'],
         })

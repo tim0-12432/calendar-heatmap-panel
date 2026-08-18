@@ -1,7 +1,7 @@
-import { DataFrameType, FieldType, PanelDataSummary, VisualizationSuggestionScore, VisualizationSuggestionsSupplier } from "@grafana/data";
+import { DataFrameType, FieldConfig, FieldType, PanelDataSummary, VisualizationSuggestionScore, VisualizationSuggestionsSupplier } from "@grafana/data";
 import { CalendarHeatmapOptions } from "types";
 
-export const calendarHeatmapSuggestionSupplier: VisualizationSuggestionsSupplier<CalendarHeatmapOptions, {}> = (dataSummary: PanelDataSummary) => {
+export const calendarHeatmapSuggestionSupplier: VisualizationSuggestionsSupplier<CalendarHeatmapOptions, FieldConfig> = (dataSummary: PanelDataSummary) => {
     if (
         !dataSummary.hasFieldType(FieldType.time) ||
         !dataSummary.hasFieldType(FieldType.number) ||
@@ -19,7 +19,7 @@ export const calendarHeatmapSuggestionSupplier: VisualizationSuggestionsSupplier
     return [
         {
             name: "Calendar Heatmap",
-            score: score,
+            score,
         }
     ]
 }
