@@ -26,6 +26,7 @@ jobs:
           node-version: 20
 
       - name: Validate translation keys
+        shell: bash
         run: |
           node -e "$(cat <<'SCRIPT'
           const fs = require('fs');
@@ -50,17 +51,16 @@ jobs:
 
           /**
            * Extract i18n keys from file content.
-           * Matches t('key') and t("key") where the key starts with 'panel.'.
+           * Matches t('key', ...), t("key", ...), t(`key`, ...) where the key starts with 'panel.'.
            */
           function extractKeys(content) {
-            // Matches t('…'), t("…"), t(`…`)  — the captured group is the key
             const regex = /t\(['"`]([^'"`]+)['"`][^)]*\)/g;
             const keys = [];
             let match;
             while ((match = regex.exec(content)) !== null) {
-                if (match[1]?.startsWith('panel.')) {
+              if (match[1]?.startsWith('panel.')) {
                 keys.push(match[1]);
-                }
+              }
             }
             return keys;
           }
@@ -84,10 +84,19 @@ jobs:
           // ---------------------------------------------------------------
           const sourceDir = 'src';
           const localeDir = 'src/locales';
-          const localeFiles = fs.readdirSync(localeDir, { withFileTypes: true })
+          const panelFileName = 'tim012432-calendarheatmap-panel.json';
+
+          // Discover locales by directory name: src/locales/<locale>/<panelFileName>
+          const locales = fs.readdirSync(localeDir, { withFileTypes: true })
             .filter(dirent => dirent.isDirectory())
-            .map(dirent => path.join(localeDir, dirent.name, 'tim012432-calendarheatmap-panel.json'))
-            .filter(fs.existsSync);
+            .map(dirent => dirent.name)
+            .filter(locale => fs.existsSync(path.join(localeDir, locale, panelFileName)))
+            .sort();
+
+          if (locales.length === 0) {
+            console.error(`::error::No locale files found at ${localeDir}/<locale>/${panelFileName}`);
+            process.exit(1);
+          }
 
           // Gather all source files
           const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
@@ -97,8 +106,7 @@ jobs:
           const allKeys = new Set();
           for (const file of sourceFiles) {
             const content = fs.readFileSync(file, 'utf8');
-            const keys = extractKeys(content);
-            keys.forEach(k => allKeys.add(k));
+            extractKeys(content).forEach(k => allKeys.add(k));
           }
 
           if (allKeys.size === 0) {
@@ -106,36 +114,44 @@ jobs:
             process.exit(0);
           }
 
-          // Check each locale file
-          const missing = {};
-          for (const lf of localeFiles) {
-            if (!fs.existsSync(lf)) {
-              console.error(`::error::Locale file not found: ${lf}`);
+          // Build map: key -> { present: [locales], missing: [locales] }
+          const keyStatus = {};
+          for (const key of allKeys) {
+            keyStatus[key] = { present: [], missing: [] };
+          }
+
+          for (const locale of locales) {
+            const filePath = path.join(localeDir, locale, panelFileName);
+            let localeData;
+            try {
+              localeData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            } catch (err) {
+              console.error(`::error title=Failure file=${filePath}::Invalid JSON: ${err.message}`);
               process.exit(1);
             }
-            const localeData = JSON.parse(fs.readFileSync(lf, 'utf8'));
-            const lfRelative = path.relative(process.cwd(), lf);
-            const missingKeys = [];
             for (const key of allKeys) {
-              if (!checkKeyInJSON(localeData, key)) {
-                missingKeys.push(key);
+              if (checkKeyInJSON(localeData, key)) {
+                keyStatus[key].present.push(locale);
+              } else {
+                keyStatus[key].missing.push(locale);
               }
-            }
-            if (missingKeys.length > 0) {
-              missing[lfRelative] = missingKeys;
             }
           }
 
-          if (Object.keys(missing).length > 0) {
-            console.error('::error::Missing translations detected:');
-            for (const [file, keys] of Object.entries(missing)) {
-              console.error(`\nIn ${file}:`);
-              keys.forEach(k => console.error(`  - ${k}`));
+          const sortedKeys = [...allKeys].sort();
+          const keysWithMissing = sortedKeys.filter(k => keyStatus[k].missing.length > 0);
+
+          if (keysWithMissing.length > 0) {
+            console.error('::error title=Failure::Missing translations detected:');
+            for (const key of keysWithMissing) {
+              console.error(`::error::- ${key}: ${keyStatus[key].missing.join(', ')} missing`);
             }
             process.exit(1);
           }
 
-          console.log('All translation keys are present in every locale file.');
+          console.log(`::notice title=Success::All ${sortedKeys.length} translation keys are present in every locale file (${locales.join(', ')}):`);
+          for (const key of sortedKeys) {
+            console.log(`::notice::- ${key}`);
+          }
           SCRIPT
           )"
-        shell: bash

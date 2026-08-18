@@ -28,20 +28,22 @@ jobs:
           echo "Package version: $VERSION"
 
       - name: Check version appears twice in CHANGELOG.md
+        if: always()
         run: |
           VERSION="${{ steps.pkg.outputs.version }}"
           COUNT=$(grep -c "$VERSION" CHANGELOG.md || true)
           echo "Found $COUNT occurrences of $VERSION in CHANGELOG.md"
           if [ "$COUNT" -lt 2 ]; then
-            echo "::error::Version $VERSION must appear at least twice in CHANGELOG.md (found $COUNT)"
+            echo "::error title=Failure::Version $VERSION must appear at least twice in CHANGELOG.md (found $COUNT)"
             exit 1
           fi
 
       - name: Check version in README.md
+        if: always()
         run: |
           VERSION="${{ steps.pkg.outputs.version }}"
           if ! grep -q "$VERSION" README.md; then
-            echo "::error::Version $VERSION not found in README.md"
+            echo "::error title=Failure::Version $VERSION not found in README.md"
             exit 1
           fi
 
