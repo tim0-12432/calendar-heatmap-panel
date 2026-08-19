@@ -18,7 +18,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
   "links": [],
   "panels": [
     {
@@ -151,7 +150,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Provisioned calendar-heatmap-panel dashboard",
-  "uid": "a538aeff-5a8a-42a5-901c-938d896fdd6f",
+  "title": "Provisioned calendar-heatmap-panel dashboard (Bug 43 Reproduction)",
+  "uid": "a538aeff-5c8a-42a5-901c-938d896fdd6f",
   "version": 1
 }

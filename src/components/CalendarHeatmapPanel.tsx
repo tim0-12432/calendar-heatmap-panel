@@ -73,8 +73,31 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
     return m;
   }, [heatmapData]);
 
-  const rawStartDate = useMemo(() => new Date(timeRange.from.valueOf()), [timeRange.from]);
-  const rawEndDate = useMemo(() => new Date(timeRange.to.valueOf()), [timeRange.to]);
+  const [ rawStartDate, rawEndDate ] = useMemo(() => {
+    console.warn('calculating raw start/end date', { 'useTimeRangeOfData': options.useTimeRangeOfData, 'dataSeriesLength': data.series.length });
+    const rawStart = new Date(timeRange.from.valueOf());
+    const rawEnd = new Date(timeRange.to.valueOf());
+    if (options.useTimeRangeOfData && data.series.length <= 0) {
+      return [rawStart, rawEnd];
+    }
+    if (!options.useTimeRangeOfData) {
+      return [rawStart, rawEnd];
+    }
+    const dates = data.series.map((frame) => {
+      const timeField = frame.fields.find((f) => f.type === 'time');
+      if (!timeField) {
+        return null;
+      }
+      return timeField.values.map((v) => new Date(v).getTime());
+    }).flat().filter((d): d is number => d !== null);
+    if (dates.length === 0) {
+      return [rawStart, rawEnd];
+    }
+    const minDate = new Date(Math.min(...dates));
+    const maxDate = new Date(Math.max(...dates));
+    console.warn('min/max date', { 'length': dates.length, 'min date': minDate, 'max date': maxDate });
+    return shiftDates(options.weekStart, [minDate, maxDate]);
+  }, [timeRange, data, options.weekStart, options.useTimeRangeOfData]);
 
   const availableWidth = useMemo(() => Math.max(0, width - 32), [width]);
 

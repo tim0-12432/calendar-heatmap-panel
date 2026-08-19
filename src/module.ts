@@ -255,6 +255,16 @@ export const plugin = new PanelPlugin<CalendarHeatmapOptions>(CalendarHeatmapPan
           description: t('panel.options.conversionUnit.description', 'Choose a unit for conversion'),
           category: [Categories.Data],
         })
+        .addBooleanSwitch({
+          path: 'useTimeRangeOfData',
+          name: t('panel.options.useTimeRangeOfData.name', 'Use Time Range of Data'),
+          description: t(
+            'panel.options.useTimeRangeOfData.description',
+            'Use the time range of the data instead of the dashboard time range for rendering'
+          ),
+          defaultValue: false,
+          category: [Categories.Data],
+        })
 
         // Interaction
         .addBooleanSwitch({
