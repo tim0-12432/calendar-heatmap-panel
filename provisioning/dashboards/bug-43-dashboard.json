@@ -21,6 +21,93 @@
   "links": [],
   "panels": [
     {
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "trlxrdZVk"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "noValue": "-",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "errors"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "aggregation": "sum",
+        "autoRectSize": true,
+        "colorScheme": "custom-gradient",
+        "customColor": "#22c55e",
+        "emptyColor": "semi-dark-green",
+        "enableDataLinks": true,
+        "gradientColorHigh": "red",
+        "gradientColorLow": "green",
+        "monthLabelCustom": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+        "monthLabelMode": "default",
+        "radius": 2,
+        "rectSize": 11,
+        "showLegend": true,
+        "showMonthLabels": true,
+        "showTooltip": true,
+        "showWeekLabels": true,
+        "space": 3,
+        "useTimeRangeOfData": true,
+        "weekLabelCustom": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+        "weekLabelMode": "default",
+        "weekStart": "sunday"
+      },
+      "pluginVersion": "1.2.0",
+      "targets": [
+        {
+          "csvContent": "date,amount\r\n2026-04-01,5\r\n2026-04-02,1\r\n2026-04-04,6\r\n2026-04-05,5\r\n2026-04-06,1\r\n2026-04-07,4\r\n2026-04-09,5\r\n2026-04-10,5\r\n2026-04-11,6\r\n2026-04-12,5\r\n2026-04-13,1\r\n2026-04-14,3\r\n2026-04-15,2\r\n2026-04-16,1\r\n2026-04-17,1\r\n2026-04-20,5\r\n2026-04-21,5\r\n2026-04-22,6\r\n2026-04-24,3\r\n2026-04-25,2\r\n2026-04-26,4\r\n2026-04-27,1\r\n2026-04-28,6\r\n2026-04-29,5\r\n2026-04-30,2\r\n2026-04-31,2",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "df8l0llu668sgf"
+          },
+          "refId": "A",
+          "scenarioId": "csv_content"
+        }
+      ],
+      "title": "Failures",
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "dateFormat": "YYYY-MM-DD",
+                "destinationType": "time",
+                "targetField": "date"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "tim012432-calendarheatmap-panel"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -56,6 +143,7 @@
         "colorScheme": "green",
         "customColor": "#22c55e",
         "emptyColor": "#273e24",
+        "enableDataLinks": true,
         "gradientColorHigh": "green",
         "gradientColorLow": "#ff6e2f",
         "monthLabelCustom": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
@@ -74,7 +162,7 @@
         "weekLabelMode": "default",
         "weekStart": "sunday"
       },
-      "pluginVersion": "1.1.2",
+      "pluginVersion": "1.2.0",
       "targets": [
         {
           "csvWave": [
