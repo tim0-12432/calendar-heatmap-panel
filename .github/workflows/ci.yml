@@ -149,7 +149,7 @@ jobs:
         id: filter-enterprise
         run: |
           sudo apt-get install -y jq
-          MATRIX=$(echo '${{ steps.resolve-versions.outputs.matrix }}' | jq '[.[] | select(.name | test("enterprise"; "i") | not)]')
+          MATRIX=$(echo '${{ steps.resolve-versions.outputs.matrix }}' | jq -c '[.[] | select(.name | test("enterprise"; "i") | not)]')
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
 
   playwright-tests:
