@@ -22,7 +22,7 @@ export default defineConfig<PluginOptions>({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: process.env.CI ? [['html', { open: 'never' }], ['list']] : 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -30,6 +30,12 @@ export default defineConfig<PluginOptions>({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Capture screenshot on failure for debugging. */
+    screenshot: 'only-on-failure',
+
+    /* Capture video on failure for debugging. */
+    video: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */

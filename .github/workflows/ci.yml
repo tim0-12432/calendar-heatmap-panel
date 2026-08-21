@@ -132,7 +132,7 @@ jobs:
     needs: build
     if: ${{ needs.build.outputs.has-e2e == 'true' }}
     outputs:
-      matrix: ${{ steps.resolve-versions.outputs.matrix }}
+      matrix: ${{ steps.filter-enterprise.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -145,18 +145,27 @@ jobs:
         with:
           skip-grafana-react-19-preview-image: false
 
+      - name: Filter out Enterprise images
+        id: filter-enterprise
+        run: |
+          sudo apt-get install -y jq
+          MATRIX=$(echo '${{ steps.resolve-versions.outputs.matrix }}' | jq -c '[.[] | select(.name | test("enterprise"; "i") | not)]')
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
   playwright-tests:
     needs: [resolve-versions, build]
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: read
       id-token: write
       pull-requests: write
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
     strategy:
       fail-fast: false
       matrix:
         GRAFANA_IMAGE: ${{fromJson(needs.resolve-versions.outputs.matrix)}}
-    name: e2e test ${{ matrix.GRAFANA_IMAGE.name }}@${{ matrix.GRAFANA_IMAGE.VERSION }}
+    name: e2e test ${{ matrix.GRAFANA_IMAGE.name }}@${{ matrix.GRAFANA_IMAGE.version }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -186,7 +195,7 @@ jobs:
       - name: Start Grafana
         run: |
           docker compose pull
-          ANONYMOUS_AUTH_ENABLED=false DEVELOPMENT=false GRAFANA_VERSION=${{ matrix.GRAFANA_IMAGE.VERSION }} GRAFANA_IMAGE=${{ matrix.GRAFANA_IMAGE.NAME }} docker compose up -d
+          ANONYMOUS_AUTH_ENABLED=false DEVELOPMENT=false GRAFANA_VERSION=${{ matrix.GRAFANA_IMAGE.version }} GRAFANA_IMAGE=${{ matrix.GRAFANA_IMAGE.name }} docker compose up -d
 
       - name: Wait for grafana server
         uses: grafana/plugin-actions/wait-for-grafana@wait-for-grafana/v1.0.2
@@ -216,14 +225,13 @@ jobs:
       - name: Stop grafana docker
         run: docker compose down
 
-      # Uncomment this step to upload the server log to Github artifacts. Remember Github artifacts are public on the Internet if the repository is public.
-      # - name: Upload server log
-      #   uses: actions/upload-artifact@v4
-      #   if: ${{ always() && steps.run-tests.outcome == 'failure' }}
-      #   with:
-      #     name: ${{ matrix.GRAFANA_IMAGE.NAME }}-v${{ matrix.GRAFANA_IMAGE.VERSION }}-${{github.run_id}}-server-log
-      #     path: grafana-server.log
-      #     retention-days: 5
+      - name: Upload server log
+        uses: actions/upload-artifact@v4
+        if: ${{ always() && steps.run-tests.outcome == 'failure' }}
+        with:
+          name: ${{ matrix.GRAFANA_IMAGE.name }}-v${{ matrix.GRAFANA_IMAGE.version }}-${{github.run_id}}-server-log
+          path: grafana-server.log
+          retention-days: 5
 
   publish-report:
     if: ${{ always() && !cancelled() }}

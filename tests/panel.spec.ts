@@ -232,8 +232,16 @@ async function openPanelEditPageById(id: string, deps: PanelDeps, overrides?: Pa
   return panelEditPage;
 }
 
-test.beforeEach(() => {
+test.beforeEach(async ({ page }, testInfo) => {
   tempDashboardUids.clear();
+
+  // Capture browser console errors for debugging
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') {
+      // eslint-disable-next-line no-console
+      console.log(`[Browser Error - ${testInfo.title}] ${msg.text()}`);
+    }
+  });
 });
 
 test.afterEach(async ({ request }) => {
