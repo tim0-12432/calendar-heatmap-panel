@@ -1,6 +1,42 @@
 import { dateTime, dateTimeFormat } from '@grafana/data';
 import { HeatmapValue } from 'types';
 
+const WEEK_START_INDEX: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  saturday: 6,
+};
+
+export function getLastWeekStartDate(date: Date, weekStart: 'saturday' | 'sunday' | 'monday'): Date {
+  const weekStartIndex = WEEK_START_INDEX[weekStart] ?? 0;
+  const dow = date.getDay();
+  const offset = (dow - weekStartIndex + 7) % 7;
+  return addDays(date, -offset);
+}
+
+/**
+ * Computes the start date we hand to @uiw/react-heat-map.
+ * The library internally snaps any non-Sunday startDate back to Sunday using
+ * millisecond arithmetic, which produces a wrong date when the subtraction
+ * crosses a DST transition (e.g. 2026-03-29 in Europe). By passing an exact
+ * Sunday (local midnight) ourselves, the library skips its own snap.
+ * Equivalent to the old behavior outside DST: first snap to the visual week
+ * start, then snap that day back to Sunday.
+ */
+export function getLibraryStartDate(date: Date, weekStart: 'saturday' | 'sunday' | 'monday'): Date {
+  const weekStartDate = getLastWeekStartDate(date, weekStart);
+  return getLastWeekStartDate(weekStartDate, 'sunday');
+}
+
+/**
+ * End of day (23:59:59.999) in local time. The heat-map library compares cell
+ * timestamps against endDate using millisecond math and drifts +1h across a
+ * DST transition, which would drop the last day if endDate were midnight.
+ */
+export function endOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+}
+
 export function formatDate(date: Date, timeZone?: string): string {
   return dateTimeFormat(dateTime(date), {
     format: 'YYYY/MM/DD',
@@ -8,8 +44,19 @@ export function formatDate(date: Date, timeZone?: string): string {
   });
 }
 
+/** The heat-map library indexes cells as YYYY/M/D (not YYYY/MM/DD). */
+export function formatHeatMapDate(date: Date, timeZone?: string): string {
+  const [year, month, day] = formatDate(date, timeZone).split('/');
+  return `${Number(year)}/${Number(month)}/${Number(day)}`;
+}
+
 function addDays(date: Date, days: number): Date {
-  return dateTime(date).add(days, 'day').toDate();
+  // Operate on local calendar components directly to avoid DST-related
+  // off-by-one errors when the shift crosses a DST transition.
+  const y = date.getFullYear();
+  const m = date.getMonth();
+  const d = date.getDate();
+  return new Date(y, m, d + days); // JS Date normalizes day overflow/underflow correctly
 }
 
 /** Parse either YYYY/MM/DD or YYYY-MM-DD */
@@ -55,17 +102,14 @@ export function shiftHeatMapData(
   timeZone?: string
 ): HeatmapValue[] {
   const renderShiftDays = getRenderShiftDays(weekstart);
-  if (renderShiftDays === 0) {
-    return heatmapData;
-  }
-
   return heatmapData.map((d) => {
     const dt = parseAnyYMD(d.date);
     if (!dt) {
       return d;
     }
-    const shifted = formatDate(addDays(dt, renderShiftDays), timeZone);
-    return { date: shifted, originalDate: d.originalDate, count: d.count } as HeatmapValue;
+    // Keep originalDate padded for Grafana/data-link lookups, but use the
+    // exact key format expected by @uiw/react-heat-map for its cell match.
+    return { ...d, date: formatHeatMapDate(addDays(dt, renderShiftDays), timeZone) } as HeatmapValue;
   });
 }
 
@@ -78,9 +122,14 @@ export function shiftDates(weekstart: 'saturday' | 'sunday' | 'monday', dates: D
 }
 
 export function getWeekCount(start: Date, end: Date): number {
-  const startDt = dateTime(start).startOf('week'); // Aligns to start of week
-  const endDt = dateTime(end);
+  const startDt = dateTime(start).startOf('day'); // Aligns to start of week
+  const endDt = dateTime(end).startOf('day');
   // Get the difference in weeks and add 1 for inclusive count
   const weeks = Math.max(0, endDt.diff(startDt, 'weeks'));
   return Math.max(1, weeks + 1);
+}
+
+export function toLocalMidnight (ms: number, timeZone?: string): Date {
+    const [y, m, d] = formatDate(new Date(ms), timeZone).split(/[/-]/).map(Number);
+    return new Date(y, m - 1, d);
 }

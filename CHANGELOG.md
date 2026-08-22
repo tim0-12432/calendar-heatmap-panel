@@ -10,17 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Custom Color Gradient**: Added a configurable gradient between low and high colors
-- **Visualization Suggestions**: Added support for recommending Calendar Heatmap for compatible time-and-number data
-- **Data Links**: Cells can be clicked to open configured data links; when multiple links are available, Grafana displays a context menu
-- **Data-link Variables**: Added `__rect.value` for the aggregated value and `__rect.date` for the cell date in `YYYY-MM-DD` format
-- **Unit conversion** including all standard Grafana units
+- **Visualization Suggestions**: Added support for recommending the Calendar Heatmap for compatible time-and-number data
+- **Data Links**: Cells can now be clicked to open configured data links; when multiple links are available, Grafana displays a context menu
+- **Data Link Variables**: Added `__rect.value` for the aggregated value and `__rect.date` for the cell date, formatted as `YYYY-MM-DD`
+- **Unit Conversion** including all standard Grafana units
+- **Option to use Timeframe of Input Data** instead of the dashboard's time range
 
 ### Changed
 
-- **Package manager**: Migrated the project to pnpm
+- **Package Manager**: Migrated the project to pnpm
 
-TODO:
-- option to use data timeframe
+### Fixed
+
+- **Sporadic Date Drift** of First Day in Heatmap
 
 ## [1.1.1] - 2026-05-03
 

@@ -32,6 +32,9 @@ export function processTimeSeriesData(
 
     for (let i = 0; i < frame.length; i++) {
       const timestamp = timeField.values[i];
+      if (timestamp === null || timestamp === undefined || timestamp === 0) {
+        continue;
+      }
       const value = valueField.values[i];
       if (value === null || value === undefined || isNaN(value)) {
         continue;

@@ -7,6 +7,9 @@ import {
   shiftHeatMapData,
   shiftDates,
   getWeekCount,
+  getLastWeekStartDate,
+  getLibraryStartDate,
+  endOfDay,
 } from '../dateHelpers';
 import { HeatmapValue } from '../../types';
 
@@ -194,6 +197,67 @@ describe('dateHelpers', () => {
       const end = localNoon(2024, 2, 1);
 
       expect(getWeekCount(start, end)).toBe(1);
+    });
+  });
+
+  describe('getLibraryStartDate (DST fix)', () => {
+    const weekStarts: Array<'saturday' | 'sunday' | 'monday'> = ['saturday', 'sunday', 'monday'];
+
+    it('always returns a Sunday for all weekStart values and DST-relevant inputs', () => {
+      const inputs = [
+        new Date(2026, 3, 1), // Wed Apr 1
+        new Date(2026, 2, 29), // Sun Mar 29 (EU DST spring-forward)
+        new Date(2026, 2, 28), // Sat Mar 28
+        new Date(2026, 2, 30), // Mon Mar 30
+      ];
+
+      for (const input of inputs) {
+        for (const weekStart of weekStarts) {
+          const result = getLibraryStartDate(input, weekStart);
+          expect(result.getDay()).toBe(0);
+        }
+      }
+    });
+
+    it('matches old library snap behavior outside DST for monday and saturday', () => {
+      const farFromDst = new Date(2026, 0, 21); // Wed Jan 21 2026
+
+      for (const weekStart of ['monday', 'saturday'] as const) {
+        const old = getLastWeekStartDate(farFromDst, weekStart);
+        const snapped = new Date(old.getTime() - old.getDay() * 86400000);
+        const oldNormalized = new Date(snapped.getFullYear(), snapped.getMonth(), snapped.getDate());
+        const newResult = getLibraryStartDate(farFromDst, weekStart);
+        expect(oldNormalized.getTime()).toBe(newResult.getTime());
+      }
+    });
+
+    it('returns 2026-03-29 (not 2026-03-28) for Apr 1 input with monday weekStart', () => {
+      const result = getLibraryStartDate(new Date(2026, 3, 1), 'monday');
+
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(2);
+      expect(result.getDate()).toBe(29);
+    });
+  });
+
+  describe('endOfDay', () => {
+    it('preserves year/month/date and returns 23:59:59.999 local', () => {
+      const d = new Date(2026, 2, 29);
+      const result = endOfDay(d);
+
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(2);
+      expect(result.getDate()).toBe(29);
+      expect(result.getHours()).toBe(23);
+      expect(result.getMinutes()).toBe(59);
+      expect(result.getSeconds()).toBe(59);
+      expect(result.getMilliseconds()).toBe(999);
+    });
+
+    it('is greater than early-morning same-day for DST-tolerance', () => {
+      const d = new Date(2026, 2, 29);
+
+      expect(endOfDay(d).getTime()).toBeGreaterThan(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 1).getTime());
     });
   });
 });

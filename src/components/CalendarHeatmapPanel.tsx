@@ -13,6 +13,9 @@ import {
   getWeekCount,
   formatDate,
   reverseShift,
+  toLocalMidnight,
+  getLibraryStartDate,
+  endOfDay,
 } from '../utils/dateHelpers';
 import { css } from '@emotion/css';
 import { t } from '@grafana/i18n';
@@ -74,30 +77,37 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
   }, [heatmapData]);
 
   const [ rawStartDate, rawEndDate ] = useMemo(() => {
-    console.warn('calculating raw start/end date', { 'useTimeRangeOfData': options.useTimeRangeOfData, 'dataSeriesLength': data.series.length });
     const rawStart = new Date(timeRange.from.valueOf());
     const rawEnd = new Date(timeRange.to.valueOf());
-    if (options.useTimeRangeOfData && data.series.length <= 0) {
+    if (!options.useTimeRangeOfData || data.series.length === 0) {
       return [rawStart, rawEnd];
     }
-    if (!options.useTimeRangeOfData) {
-      return [rawStart, rawEnd];
-    }
-    const dates = data.series.map((frame) => {
+
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    for (const frame of data.series) {
       const timeField = frame.fields.find((f) => f.type === 'time');
       if (!timeField) {
-        return null;
+        continue;
       }
-      return timeField.values.map((v) => new Date(v).getTime());
-    }).flat().filter((d): d is number => d !== null);
-    if (dates.length === 0) {
+      for (const v of Array.from<unknown>(timeField.values as any)) {
+        if (v == null) {
+          continue;
+        }
+        const t = typeof v === 'number' ? v : new Date(v as any).getTime();
+        if (!Number.isFinite(t) || t <= 0) {
+          continue;
+        }
+        if (t < min) { min = t; }
+        if (t > max) { max = t; }
+      }
+    }
+    if (!Number.isFinite(min) || !Number.isFinite(max)) {
       return [rawStart, rawEnd];
     }
-    const minDate = new Date(Math.min(...dates));
-    const maxDate = new Date(Math.max(...dates));
-    console.warn('min/max date', { 'length': dates.length, 'min date': minDate, 'max date': maxDate });
-    return shiftDates(options.weekStart, [minDate, maxDate]);
-  }, [timeRange, data, options.weekStart, options.useTimeRangeOfData]);
+
+    return [toLocalMidnight(min, timeZone), toLocalMidnight(max, timeZone)];
+  }, [timeRange, data.series, options.useTimeRangeOfData, timeZone]);
 
   const availableWidth = useMemo(() => Math.max(0, width - 32), [width]);
 
@@ -343,6 +353,9 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
     [theme, options.radius, title, options.space, computedRectSize]
   );
 
+  const libStartDate = useMemo(() => getLibraryStartDate(shiftedStartDate, options.weekStart), [shiftedStartDate, options.weekStart]);
+  const libEndOfDayDate = useMemo(() => endOfDay(shiftedEndDate), [shiftedEndDate]);
+
   if (data.series.length === 0) {
     return (
       <div className={styles.container}>
@@ -356,8 +369,8 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
       <HeatMap
         className={styles.heatmap}
         value={shiftedHeatmapData}
-        startDate={shiftedStartDate}
-        endDate={shiftedEndDate}
+        startDate={libStartDate}
+        endDate={libEndOfDayDate}
         width={availableWidth}
         height={availableHeight}
         rectSize={computedRectSize}
