@@ -23,14 +23,14 @@ A Grafana panel plugin that renders time-series data as an interactive calendar 
 
 - GitHub-style calendar visualization for daily time-series values
 - Six built-in color schemes: Green, Blue, Red, Yellow, Purple, Orange
-- Five aggregation methods: Sum, Count, Average, Maximum, Minimum
+- Seven aggregation methods: Sum, Count, Average, Maximum, Minimum, First, Last
 - Auto-sizing cells to fit the available panel width
 - Theme-aware rendering for Grafana light and dark modes
 - Interactive tooltips with formatted date and value
 
 ### Customization
 
-- Cell size (8–20 px), spacing (1–24 px), and corner radius (0–6 px)
+- Cell size (8–64 px), spacing (1–24 px), and corner radius (0–16 px)
 - Optional week-day labels, month labels, and legend
 - Toggle tooltips and choose aggregation per panel
 
@@ -81,7 +81,7 @@ pnpm build
 
 1. **Create a panel** and select **Calendar Heatmap Panel**.
 2. **Add a query** returning a timestamp field and numeric value.
-3. **Choose aggregation** (Sum/Count/Avg/Max/Min) for days with multiple points.
+3. **Choose aggregation** (Sum/Count/Avg/Max/Min/First/Last) for days with multiple points.
 4. **Customize appearance**: color scheme, cell size/spacing, labels, legend, and tooltips.
 
 ### Example Queries
@@ -150,37 +150,45 @@ ORDER BY toDate(timestamp);
 
 ### Display Options
 
-| Option          | Type    | Default  | Description                                      |
-| --------------- | ------- | -------- | ------------------------------------------------ |
-| Color Scheme    | Select  | `green`  | Palette for cell intensity                       |
-| Empty Color     | Color   | None     | Color for 0 values                               |
-| Auto Size Cells | Boolean | `true`   | Fit cells to available width                     |
-| Cell Size       | Number  | `12`     | Cell size in pixels (8–20) when auto-size is off |
-| Cell Spacing    | Number  | `2`      | Gap between cells in pixels (1–24)               |
-| Border Radius   | Number  | `2`      | Corner radius in pixels (0–6)                    |
-| Week Start      | Radio   | `Sunday` | Start of the week                                |
+| Option                | Type    | Default     | Description                                                  |
+| --------------------- | ------- | ----------- | ------------------------------------------------------------ |
+| Color Scheme          | Select  | `green`     | Color palette for the heatmap                                |
+| Custom Color Theme    | Color   | `#22c55e`   | Base color for custom palette (when Color Scheme = Custom)   |
+| Gradient Low Color    | Color   | `#3b82f6`   | Color for lowest values in gradient (when Color Scheme = Custom Gradient) |
+| Gradient High Color   | Color   | `#ef4444`   | Color for highest values in gradient (when Color Scheme = Custom Gradient) |
+| Empty Color           | Color   | None        | Color for 0 values                                           |
+| Auto Cell Size        | Boolean | `true`      | Fit cells to available width                                 |
+| Cell Size             | Number  | `11`        | Cell size in pixels (8–64) when auto-size is off             |
+| Cell Spacing          | Number  | `3`         | Gap between cells in pixels (1–24)                           |
+| Corner Radius         | Number  | `2`         | Corner radius in pixels (0–16)                               |
 
 ### Label & Legend Options
 
-| Option            | Type    | Default   | Description                           |
-| ----------------- | ------- | --------- | ------------------------------------- |
-| Show Week Labels  | Boolean | `true`    | Display weekday labels (Mon–Sun)      |
-| Show Month Labels | Boolean | `true`    | Display month headers                 |
-| Show Legend       | Boolean | `true`    | Show legend for color intensities     |
-| Month Label Mode  | Radio   | `default` | Define how months should be displayed |
-| Week Label Mode   | Radio   | `default` | Define how weekdays should be shown   |
+| Option              | Type    | Default               | Description                                                       |
+| ------------------- | ------- | --------------------- | --------------------------------------------------------------- |
+| Show Week Labels    | Boolean | `true`                | Display weekday labels (Mon–Sun)                                |
+| Show Month Labels   | Boolean | `true`                | Display month headers                                           |
+| Show Legend         | Boolean | `true`                | Show legend for color intensities                               |
+| Week Start Day      | Radio   | `Sunday`              | Start of the week                                               |
+| Month Label Mode    | Radio   | `default`             | Define how months should be displayed                           |
+| Custom Month Labels | Text    | `Jan,Feb,...,Dec`     | Custom month labels (when Show Month Labels and Month Label Mode = Custom) |
+| Week Label Mode     | Radio   | `default`             | Define how weekdays should be shown                             |
+| Custom Week Labels  | Text    | `Sun,Mon,...,Sat`     | Custom weekday labels (when Show Week Labels and Week Label Mode = Custom) |
 
 ### Data Options
 
-| Option             | Type   | Default | Description                                      |
-| ------------------ | ------ | ------- | ------------------------------------------------ |
-| Aggregation Method | Select | `sum`   | Sum, Count, Average, Maximum, or Minimum per day |
+| Option                 | Type    | Default | Description                                                  |
+| ---------------------- | ------- | ------- | ------------------------------------------------------------ |
+| Aggregation            | Select  | `sum`   | Sum, Count, Average, Maximum, Minimum, First, or Last per day |
+| Conversion Unit        | Unit    | None    | Unit for value conversion                                    |
+| Use Time Range of Data | Boolean | `false` | Use data's time range instead of dashboard time range for rendering |
 
 ### Interaction Options
 
-| Option       | Type    | Default | Description                         |
-| ------------ | ------- | ------- | ----------------------------------- |
-| Show Tooltip | Boolean | `true`  | Enable tooltips with date and value |
+| Option              | Type    | Default | Description                                              |
+| ------------------- | ------- | ------- | -------------------------------------------------------- |
+| Show Tooltip        | Boolean | `true`  | Enable tooltips with date and value                      |
+| Enable Data Links   | Boolean | `true`  | Make cells clickable when data links are configured on the field |
 
 ### Color Schemes
 
@@ -247,8 +255,8 @@ ORDER BY toDate(timestamp);
 ### Prerequisites
 
 - Node.js 22+
-- npm (bundled with Node 22)
-- Docker (for running Grafana locally via `npm run server`)
+- pnpm 11.21.0
+- Docker (for running Grafana locally via `pnpm server`)
 
 ### Setup
 
@@ -261,7 +269,7 @@ pnpm server        # Launch Grafana in Docker with the plugin mounted
 ### Scripts
 
 ```bash
-pnpm dev          # Start Vite/webpack dev workflow (hot reload)
+pnpm dev          # Start webpack dev workflow (hot reload)
 pnpm build        # Production build
 pnpm lint         # ESLint
 pnpm lint:fix     # Autofix lint issues

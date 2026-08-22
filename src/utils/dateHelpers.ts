@@ -102,6 +102,9 @@ export function shiftHeatMapData(
   timeZone?: string
 ): HeatmapValue[] {
   const renderShiftDays = getRenderShiftDays(weekstart);
+  // Note: @uiw/react-heat-map mutates value[].date in place during rendering,
+  // so returning the original array here exposes originals to that mutation.
+  // This is safe because all panel lookups key off `originalDate`, never `date`.
   if (renderShiftDays === 0) {
     return heatmapData;
   }
