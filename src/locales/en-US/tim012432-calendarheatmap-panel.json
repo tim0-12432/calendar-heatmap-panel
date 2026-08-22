@@ -164,6 +164,10 @@
       "conversionUnit": {
         "description": "Choose a unit for conversion",
         "name": "Unit"
+      },
+      "useTimeRangeOfData": {
+        "description": "Use the time range of the data instead of the dashboard time range",
+        "name": "Use Time Range of Data"
       }
     }
   }
