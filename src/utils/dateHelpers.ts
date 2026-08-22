@@ -102,6 +102,9 @@ export function shiftHeatMapData(
   timeZone?: string
 ): HeatmapValue[] {
   const renderShiftDays = getRenderShiftDays(weekstart);
+  if (renderShiftDays === 0) {
+    return heatmapData;
+  }
   return heatmapData.map((d) => {
     const dt = parseAnyYMD(d.date);
     if (!dt) {

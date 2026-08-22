@@ -136,7 +136,7 @@ describe('dateHelpers', () => {
 
       expect(shifted).toHaveLength(2);
       expect(shifted[0]).toEqual({
-        date: '2024/03/09',
+        date: '2024/3/9',
         originalDate: '2024/03/10',
         count: 2,
       });
@@ -147,7 +147,7 @@ describe('dateHelpers', () => {
       const shifted = shiftHeatMapData('saturday', sample, 'UTC');
 
       expect(shifted[0]).toEqual({
-        date: '2024/03/11',
+        date: '2024/3/11',
         originalDate: '2024/03/10',
         count: 2,
       });
