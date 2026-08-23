@@ -19,13 +19,15 @@ export function getLastWeekStartDate(date: Date, weekStart: 'saturday' | 'sunday
  * The library internally snaps any non-Sunday startDate back to Sunday using
  * millisecond arithmetic, which produces a wrong date when the subtraction
  * crosses a DST transition (e.g. 2026-03-29 in Europe). By passing an exact
- * Sunday (local midnight) ourselves, the library skips its own snap.
- * Equivalent to the old behavior outside DST: first snap to the visual week
- * start, then snap that day back to Sunday.
+ * Sunday (local midnight) ourselves, the library skips its own snap in SVG.js.
+ *
+ * The caller passes an already render-shifted date (see shiftDates), so here we
+ * only snap that date back to the Sunday on or before it. We do NOT snap to the
+ * visual week start first — that double-snap can cross a week boundary backwards
+ * (up to 7 days too early) and renders an extra empty leading column.
  */
-export function getLibraryStartDate(date: Date, weekStart: 'saturday' | 'sunday' | 'monday'): Date {
-  const weekStartDate = getLastWeekStartDate(date, weekStart);
-  return getLastWeekStartDate(weekStartDate, 'sunday');
+export function getLibraryStartDate(date: Date): Date {
+  return getLastWeekStartDate(date, 'sunday');
 }
 
 /**
@@ -135,7 +137,7 @@ export function getWeekCount(start: Date, end: Date): number {
   return Math.max(1, weeks + 1);
 }
 
-export function toLocalMidnight (ms: number, timeZone?: string): Date {
-    const [y, m, d] = formatDate(new Date(ms), timeZone).split(/[/-]/).map(Number);
-    return new Date(y, m - 1, d);
+export function toLocalMidnight(ms: number, timeZone?: string): Date {
+  const [y, m, d] = formatDate(new Date(ms), timeZone).split(/[/-]/).map(Number);
+  return new Date(y, m - 1, d);
 }

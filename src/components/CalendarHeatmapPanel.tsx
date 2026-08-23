@@ -55,7 +55,16 @@ function getDefaultNumberOrCustom(
   return defaultLabels;
 }
 
-export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, options, timeRange, timeZone, title, replaceVariables }) => {
+export const CalendarHeatmapPanel: React.FC<Props> = ({
+  data,
+  width,
+  height,
+  options,
+  timeRange,
+  timeZone,
+  title,
+  replaceVariables,
+}) => {
   const theme = useTheme2();
 
   const ContextMenu = DataLinksContextMenu as React.FC<{
@@ -76,7 +85,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
     return m;
   }, [heatmapData]);
 
-  const [ rawStartDate, rawEndDate ] = useMemo(() => {
+  const [rawStartDate, rawEndDate] = useMemo(() => {
     const rawStart = new Date(timeRange.from.valueOf());
     const rawEnd = new Date(timeRange.to.valueOf());
     if (!options.useTimeRangeOfData || data.series.length === 0) {
@@ -98,8 +107,12 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
         if (!Number.isFinite(t) || t <= 0) {
           continue;
         }
-        if (t < min) { min = t; }
-        if (t > max) { max = t; }
+        if (t < min) {
+          min = t;
+        }
+        if (t > max) {
+          max = t;
+        }
       }
     }
     if (!Number.isFinite(min) || !Number.isFinite(max)) {
@@ -205,8 +218,24 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
   }, [heatmapData]);
 
   const colors = useMemo(() => {
-    return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor, options.customColor, options.gradientColorLow, options.gradientColorHigh);
-  }, [options.colorScheme, options.emptyColor, options.customColor, options.gradientColorLow, options.gradientColorHigh, theme, maxValue]);
+    return getColorPalette(
+      options.colorScheme,
+      theme,
+      maxValue,
+      options.emptyColor,
+      options.customColor,
+      options.gradientColorLow,
+      options.gradientColorHigh
+    );
+  }, [
+    options.colorScheme,
+    options.emptyColor,
+    options.customColor,
+    options.gradientColorLow,
+    options.gradientColorHigh,
+    theme,
+    maxValue,
+  ]);
 
   // sample equally from color palette, making sure to include first and last element
   const legendEntries = useMemo(() => {
@@ -227,41 +256,29 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
   }, [colors]);
 
   const getLinksForCell = useCallback(
-    (
-      frame: DataFrame,
-      field: Field<any>,
-      tile: HeatmapValue
-    ): LinkModel[] => {
+    (frame: DataFrame, field: Field<any>, tile: HeatmapValue): LinkModel[] => {
       const scopedVars = {
-      ...(field.state?.scopedVars ?? {}),
-      '__rect': {
-        value: {
-          value: tile.count,
-          date: tile.originalDate.replaceAll('/', '-'),
+        ...(field.state?.scopedVars ?? {}),
+        __rect: {
+          value: {
+            value: tile.count,
+            date: tile.originalDate.replaceAll('/', '-'),
+          },
+          text: String(tile.count),
         },
-        text: String(tile.count),
-      },
-    };
-    const getLinks = getLinksSupplier(
-      frame,
-      field,
-      scopedVars,
-      replaceVariables,
-      timeZone
-    );
-    return getLinks({
-      valueRowIndex: tile.rowIndex,
-    });
-  }, [replaceVariables, timeZone]);
+      };
+      const getLinks = getLinksSupplier(frame, field, scopedVars, replaceVariables, timeZone);
+      return getLinks({
+        valueRowIndex: tile.rowIndex,
+      });
+    },
+    [replaceVariables, timeZone]
+  );
 
   const linksByOriginalDate = useMemo(() => {
     const m = new Map<string, () => LinkModel[]>();
     for (const d of heatmapData) {
-      if (
-        d.frameIndex === undefined ||
-        d.fieldIndex === undefined ||
-        d.rowIndex === undefined
-      ) {
+      if (d.frameIndex === undefined || d.fieldIndex === undefined || d.rowIndex === undefined) {
         continue;
       }
       const frame = data.series[d.frameIndex];
@@ -270,11 +287,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
         continue;
       }
       m.set(d.originalDate, () => {
-        return getLinksForCell(
-          frame,
-          field,
-          d
-        );
+        return getLinksForCell(frame, field, d);
       });
     }
     return m;
@@ -329,7 +342,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
 
         /* Correct week labels off placement */
         > text.w-heatmap-week {
-          transform: translateY(-${computedRectSize/2+options.space/2}px);
+          transform: translateY(-${computedRectSize / 2 + options.space / 2}px);
         }
       `,
       legend: css`
@@ -353,7 +366,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
     [theme, options.radius, title, options.space, computedRectSize]
   );
 
-  const libStartDate = useMemo(() => getLibraryStartDate(shiftedStartDate, options.weekStart), [shiftedStartDate, options.weekStart]);
+  const libStartDate = useMemo(() => getLibraryStartDate(shiftedStartDate), [shiftedStartDate]);
   const libEndOfDayDate = useMemo(() => endOfDay(shiftedEndDate), [shiftedEndDate]);
 
   if (data.series.length === 0) {
@@ -417,8 +430,11 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
           return (
             <ContextMenu links={getLinks!} config={fieldConfig}>
               {(api) => (
-                <g onClick={api.openMenu as unknown as React.MouseEventHandler<SVGGElement>} style={{ cursor: 'pointer' }}>
-                  { withTooltip(rect()) }
+                <g
+                  onClick={api.openMenu as unknown as React.MouseEventHandler<SVGGElement>}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {withTooltip(rect())}
                 </g>
               )}
             </ContextMenu>
@@ -429,14 +445,14 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
       {options.showLegend && (
         <div className={styles.legend}>
           <span>{t('panel.component.legend.less', 'Less')}</span>
-            {legendEntries.map(([key, color]) => (
-              <div
-                key={key}
-                className={styles.legendRect}
-                style={{ backgroundColor: color }}
-                title={t('panel.component.legend.tooltip', 'Level {{level}}', { level: key })}
-              />
-            ))}
+          {legendEntries.map(([key, color]) => (
+            <div
+              key={key}
+              className={styles.legendRect}
+              style={{ backgroundColor: color }}
+              title={t('panel.component.legend.tooltip', 'Level {{level}}', { level: key })}
+            />
+          ))}
           <span>{t('panel.component.legend.more', 'More')}</span>
           {maxValue > 0 && (
             <span style={{ marginLeft: 8 }}>
