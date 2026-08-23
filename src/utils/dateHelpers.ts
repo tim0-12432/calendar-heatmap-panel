@@ -7,7 +7,7 @@ const WEEK_START_INDEX: Record<string, number> = {
   saturday: 6,
 };
 
-export function getLastWeekStartDate(date: Date, weekStart: 'saturday' | 'sunday' | 'monday'): Date {
+function getLastWeekStartDate(date: Date, weekStart: 'saturday' | 'sunday' | 'monday'): Date {
   const weekStartIndex = WEEK_START_INDEX[weekStart] ?? 0;
   const dow = date.getDay();
   const offset = (dow - weekStartIndex + 7) % 7;
@@ -47,7 +47,7 @@ export function formatDate(date: Date, timeZone?: string): string {
 }
 
 /** The heat-map library indexes cells as YYYY/M/D (not YYYY/MM/DD). */
-export function formatHeatMapDate(date: Date, timeZone?: string): string {
+function formatHeatMapDate(date: Date, timeZone?: string): string {
   const [year, month, day] = formatDate(date, timeZone).split('/');
   return `${Number(year)}/${Number(month)}/${Number(day)}`;
 }

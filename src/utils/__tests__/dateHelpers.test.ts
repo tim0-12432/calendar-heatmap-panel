@@ -7,7 +7,6 @@ import {
   shiftHeatMapData,
   shiftDates,
   getWeekCount,
-  getLastWeekStartDate,
   getLibraryStartDate,
   endOfDay,
 } from '../dateHelpers';
@@ -223,7 +222,11 @@ describe('dateHelpers', () => {
       ];
 
       for (const input of inputs) {
-        const expected = getLastWeekStartDate(input, 'sunday');
+        // Replicate getLastWeekStartDate(input, 'sunday'): snap back to the
+        // Sunday on or before the input by subtracting the day-of-week offset
+        // (Sunday = 0) using local calendar arithmetic.
+        const offset = input.getDay();
+        const expected = new Date(input.getFullYear(), input.getMonth(), input.getDate() - offset);
         const result = getLibraryStartDate(input);
         expect(result.getTime()).toBe(expected.getTime());
       }
