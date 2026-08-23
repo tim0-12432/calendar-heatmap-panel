@@ -2,10 +2,10 @@
   <img src="./src/img/logo.svg" height="100" />
   <h1>Calendar Heatmap Panel</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Grafana](https://img.shields.io/badge/Grafana-12.3%2B-orange.svg)](https://grafana.com)
-[![Node](https://img.shields.io/badge/Node-22%2B-green.svg)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](https://opensource.org/licenses/MIT)
+[![Grafana](https://img.shields.io/badge/Grafana-12.3%2B-orange?logo=grafana)](https://grafana.com)
+[![Node](https://img.shields.io/badge/Node-22%2B-green?logo=nodedotjs)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue?logo=typescript)](https://www.typescriptlang.org/)
 
 </div>
 
