@@ -21,15 +21,15 @@ Turn raw time-series data into an instantly readable, GitHub-style activity cale
 ## Why teams love it
 
 - **GitHub-style calendar visualization** makes activity patterns immediately obvious.
-- **Six color schemes** (Green, Blue, Red, Yellow, Purple, Orange) to match your brand or dashboard theme.
-- **Five aggregation methods** (Sum, Count, Average, Max, Min) to capture the story behind your data.
+- **Eight color schemes** (Green, Blue, Red, Yellow, Purple, Orange, Custom, Custom Gradient) to match your brand or dashboard theme.
+- **Seven aggregation methods** (Sum, Count, Average, Maximum, Minimum, First, Last) to capture the story behind your data.
 - **Auto-sizing cells with theme-aware rendering** for beautiful, responsive dashboards.
 - **Interactive tooltips** for fast, precise inspection of any day.
 - **Fully customizable layout** with control over cell size, spacing, labels, and legends.
 
 ## Quick start
 
-1. Install **Calendar Heatmap Panel** from the Grafana plugin catalog.
+1. Install **Calendar Heatmap Panel** from the Grafana plugin catalog (recommended), or via Grafana CLI (`grafana-cli plugins install tim012432-calendarheatmap-panel`).
 2. Add the panel to any dashboard with time-series data.
 3. Choose an aggregation method and color scheme.
 4. Adjust cell size, spacing, labels, and legend to match your layout.
@@ -45,11 +45,13 @@ You’ll have a calendar-style heatmap in minutes—no custom code required.
 
 ## Configuration highlights
 
-- **Color schemes**: quickly switch between six curated palettes.
-- **Aggregation**: summarize values as Sum, Count, Average, Max, or Min.
+- **Color schemes**: quickly switch between eight curated palettes (Green, Blue, Red, Yellow, Purple, Orange, Custom, Custom Gradient).
+- **Aggregation**: summarize values as Sum, Count, Average, Maximum, Minimum, First, or Last.
 - **Layout controls**: tune cell size, spacing, and corner radius.
 - **Labels & legend**: show week/month labels and legend for clarity.
 - **Tooltips**: give viewers precise daily values on hover.
+
+For the full configuration reference, including all display, label, data, and interaction options, see the [documentation on GitHub](https://github.com/tim0-12432/calendar-heatmap-panel#%EF%B8%8F-configuration-reference).
 
 ## Support and links
 
