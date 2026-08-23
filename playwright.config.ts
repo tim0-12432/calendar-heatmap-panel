@@ -15,18 +15,27 @@ const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
  */
 export default defineConfig<PluginOptions>({
   testDir: './tests',
-  /* Run tests in files in parallel */
+  /* Run tests in files in parallel. Note: workers:1 below intentionally
+     serializes everything anyway, because there is only a single containerized
+     Grafana instance to run against. */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
+  /* Keep worker count low so we do not overwhelm the single containerized Grafana instance. */
+  workers: 1,
+  /* Container startup and dashboard rendering can be slow; give tests headroom. */
+  timeout: 60_000,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.GRAFANA_URL || 'http://localhost:3000',
+
+    /* Pin the browser locale so assertions on Grafana/plugin texts stay deterministic. */
+    locale: 'en-US',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',

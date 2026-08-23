@@ -200,10 +200,8 @@ describe('dateHelpers', () => {
     });
   });
 
-  describe('getLibraryStartDate (DST fix)', () => {
-    const weekStarts: Array<'saturday' | 'sunday' | 'monday'> = ['saturday', 'sunday', 'monday'];
-
-    it('always returns a Sunday for all weekStart values and DST-relevant inputs', () => {
+  describe('getLibraryStartDate', () => {
+    it('always returns a Sunday for DST-relevant inputs', () => {
       const inputs = [
         new Date(2026, 3, 1), // Wed Apr 1
         new Date(2026, 2, 29), // Sun Mar 29 (EU DST spring-forward)
@@ -212,31 +210,86 @@ describe('dateHelpers', () => {
       ];
 
       for (const input of inputs) {
-        for (const weekStart of weekStarts) {
-          const result = getLibraryStartDate(input, weekStart);
-          expect(result.getDay()).toBe(0);
-        }
+        const result = getLibraryStartDate(input);
+        expect(result.getDay()).toBe(0);
       }
     });
 
-    it('matches old library snap behavior outside DST for monday and saturday', () => {
-      const farFromDst = new Date(2026, 0, 21); // Wed Jan 21 2026
+    it('returns the Sunday on or before the input date (new semantics)', () => {
+      const inputs = [
+        new Date(2026, 0, 21), // Wed Jan 21 2026
+        new Date(2026, 3, 1), // Wed Apr 1 2026
+        new Date(2026, 2, 30), // Mon Mar 30 2026
+      ];
 
-      for (const weekStart of ['monday', 'saturday'] as const) {
-        const old = getLastWeekStartDate(farFromDst, weekStart);
-        const snapped = new Date(old.getTime() - old.getDay() * 86400000);
-        const oldNormalized = new Date(snapped.getFullYear(), snapped.getMonth(), snapped.getDate());
-        const newResult = getLibraryStartDate(farFromDst, weekStart);
-        expect(oldNormalized.getTime()).toBe(newResult.getTime());
+      for (const input of inputs) {
+        const expected = getLastWeekStartDate(input, 'sunday');
+        const result = getLibraryStartDate(input);
+        expect(result.getTime()).toBe(expected.getTime());
       }
     });
 
-    it('returns 2026-03-29 (not 2026-03-28) for Apr 1 input with monday weekStart', () => {
-      const result = getLibraryStartDate(new Date(2026, 3, 1), 'monday');
+    it('returns 2026-03-29 (not 2026-03-28) for Apr 1 input', () => {
+      const result = getLibraryStartDate(new Date(2026, 3, 1));
 
       expect(result.getFullYear()).toBe(2026);
       expect(result.getMonth()).toBe(2);
       expect(result.getDate()).toBe(29);
+    });
+
+    it('bug repro: Wed Apr 1 2026 returns Sun Mar 29 2026 (not Mar 22 as the old saturday double-snap did)', () => {
+      const result = getLibraryStartDate(new Date(2026, 3, 1));
+
+      expect(result.getDay()).toBe(0);
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(2);
+      expect(result.getDate()).toBe(29);
+    });
+
+    it('dashboard case: Mon Feb 23 2026 returns Sun Feb 22 2026', () => {
+      const result = getLibraryStartDate(new Date(2026, 1, 23));
+
+      expect(result.getDay()).toBe(0);
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(1);
+      expect(result.getDate()).toBe(22);
+    });
+
+    it('Monday latent-bug case: Sun Apr 5 2026 returns Apr 5 2026', () => {
+      const result = getLibraryStartDate(new Date(2026, 3, 5));
+
+      expect(result.getDay()).toBe(0);
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(3);
+      expect(result.getDate()).toBe(5);
+    });
+
+    it('DST: EU spring-forward Sunday Mar 29 2026 stays exact local-midnight Sunday', () => {
+      const input = new Date(2026, 2, 29); // Sun Mar 29 2026, local midnight
+      const result = getLibraryStartDate(input);
+
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(2);
+      expect(result.getDate()).toBe(29);
+      expect(result.getHours()).toBe(0);
+      expect(result.getMinutes()).toBe(0);
+      expect(result.getSeconds()).toBe(0);
+      expect(result.getMilliseconds()).toBe(0);
+      expect(result.getDay()).toBe(0);
+    });
+
+    it('DST: US fall-back Sunday Nov 1 2026 stays exact local-midnight Sunday', () => {
+      const input = new Date(2026, 10, 1); // Sun Nov 1 2026, local midnight
+      const result = getLibraryStartDate(input);
+
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(10);
+      expect(result.getDate()).toBe(1);
+      expect(result.getHours()).toBe(0);
+      expect(result.getMinutes()).toBe(0);
+      expect(result.getSeconds()).toBe(0);
+      expect(result.getMilliseconds()).toBe(0);
+      expect(result.getDay()).toBe(0);
     });
   });
 
