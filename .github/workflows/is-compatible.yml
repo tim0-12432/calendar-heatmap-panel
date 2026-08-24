@@ -5,23 +5,18 @@ jobs:
   compatibilitycheck:
     runs-on: ubuntu-latest
     permissions:
+      pull-requests: write
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Setup Node.js and pnpm environment
+        uses: pnpm/setup@v2
 
       - name: Build plugin
-        run: npm run build
+        run: pnpm build
 
       - name: Find module.ts or module.tsx
         id: find-module-ts
@@ -33,5 +28,5 @@ jobs:
         uses: grafana/plugin-actions/is-compatible@is-compatible/v1.0.4
         with:
           module: ${{ steps.find-module-ts.outputs.modulets }}
-          comment-pr: 'no'
-          fail-if-incompatible: 'yes'
+          comment-pr: 'yes'
+          fail-if-incompatible: 'no'

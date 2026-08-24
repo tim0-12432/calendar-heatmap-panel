@@ -1,0 +1,155 @@
+name: Translation Check
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+    paths:
+      - 'src/**'
+
+jobs:
+  check-translations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+
+      - name: Validate translation keys
+        shell: bash
+        run: |
+          node -e "$(cat <<'SCRIPT'
+          const fs = require('fs');
+          const path = require('path');
+
+          /**
+           * Recursively collect all files with given extensions under a directory.
+           */
+          function getSourceFiles(dir, extensions) {
+            let results = [];
+            const list = fs.readdirSync(dir, { withFileTypes: true });
+            for (const item of list) {
+              const fullPath = path.join(dir, item.name);
+              if (item.isDirectory()) {
+                results = results.concat(getSourceFiles(fullPath, extensions));
+              } else if (extensions.includes(path.extname(item.name))) {
+                results.push(fullPath);
+              }
+            }
+            return results;
+          }
+
+          /**
+           * Extract i18n keys from file content.
+           * Matches t('key', ...), t("key", ...), t(`key`, ...) where the key starts with 'panel.'.
+           */
+          function extractKeys(content) {
+            const regex = /t\(['"`]([^'"`]+)['"`][^)]*\)/g;
+            const keys = [];
+            let match;
+            while ((match = regex.exec(content)) !== null) {
+              if (match[1]?.startsWith('panel.')) {
+                keys.push(match[1]);
+              }
+            }
+            return keys;
+          }
+
+          /**
+           * Check if a dot-separated path exists inside a nested object.
+           */
+          function checkKeyInJSON(obj, keyPath) {
+            const parts = keyPath.split('.');
+            let current = obj;
+            for (const part of parts) {
+              if (current && typeof current === 'object' && part in current) {
+                current = current[part];
+              } else {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          // ---------------------------------------------------------------
+          const sourceDir = 'src';
+          const localeDir = 'src/locales';
+          const panelFileName = 'tim012432-calendarheatmap-panel.json';
+
+          // Discover locales by directory name: src/locales/<locale>/<panelFileName>
+          const locales = fs.readdirSync(localeDir, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name)
+            .filter(locale => fs.existsSync(path.join(localeDir, locale, panelFileName)))
+            .sort();
+
+          if (locales.length === 0) {
+            console.error(`::error::No locale files found at ${localeDir}/<locale>/${panelFileName}`);
+            process.exit(1);
+          }
+
+          // Gather all source files
+          const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
+          const sourceFiles = getSourceFiles(sourceDir, extensions);
+
+          // Extract unique keys starting with 'panel.'
+          const allKeys = new Set();
+          for (const file of sourceFiles) {
+            const content = fs.readFileSync(file, 'utf8');
+            extractKeys(content).forEach(k => allKeys.add(k));
+          }
+
+          if (allKeys.size === 0) {
+            console.log('No translatable keys found in source files.');
+            process.exit(0);
+          }
+
+          // Build map: key -> { present: [locales], missing: [locales] }
+          const keyStatus = {};
+          for (const key of allKeys) {
+            keyStatus[key] = { present: [], missing: [] };
+          }
+
+          for (const locale of locales) {
+            const filePath = path.join(localeDir, locale, panelFileName);
+            let localeData;
+            try {
+              localeData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            } catch (err) {
+              console.error(`::error title=Failure file=${filePath}::Invalid JSON: ${err.message}`);
+              process.exit(1);
+            }
+            for (const key of allKeys) {
+              if (checkKeyInJSON(localeData, key)) {
+                keyStatus[key].present.push(locale);
+              } else {
+                keyStatus[key].missing.push(locale);
+              }
+            }
+          }
+
+          const sortedKeys = [...allKeys].sort();
+          const keysWithMissing = sortedKeys.filter(k => keyStatus[k].missing.length > 0);
+
+          if (keysWithMissing.length > 0) {
+            console.error('::error title=Failure::Missing translations detected:');
+            for (const key of keysWithMissing) {
+              console.error(`::error::- ${key}: ${keyStatus[key].missing.join(', ')} missing`);
+            }
+            process.exit(1);
+          }
+
+          console.log(`::notice title=Success::All ${sortedKeys.length} translation keys are present in every locale file (${locales.join(', ')}):`);
+          for (const key of sortedKeys) {
+            console.log(`::notice::- ${key}`);
+          }
+          SCRIPT
+          )"

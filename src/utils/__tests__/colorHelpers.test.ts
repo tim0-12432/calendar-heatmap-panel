@@ -122,4 +122,24 @@ describe('getColorPalette', () => {
     expect(palette[0]).toBe('rgb(20, 20, 20)');
     expect(palette[1]).toBe('rgb(20, 20, 20)');
   });
+
+  it('tests gradient generation', () => {
+    const theme = createTheme({ isDark: true });
+    const maxCount = 4;
+    const redBlueGradient = getColorPalette('custom-gradient', theme, maxCount, '#000', undefined, '#0000ff', '#ff0000');
+    const expected = [
+      "rgb(0, 0, 255)",
+      "rgb(28, 0, 227)",
+      "rgb(57, 0, 198)",
+      "rgb(85, 0, 170)",
+      "rgb(113, 0, 142)",
+      "rgb(142, 0, 113)",
+      "rgb(170, 0, 85)",
+      "rgb(198, 0, 57)",
+    ];
+
+    expect(Object.keys(redBlueGradient).length).toEqual(12);
+    expect([redBlueGradient[2], redBlueGradient[3], redBlueGradient[4], redBlueGradient[5], redBlueGradient[6], redBlueGradient[7], redBlueGradient[8], redBlueGradient[9]]).toEqual(expected);
+  });
+
 });

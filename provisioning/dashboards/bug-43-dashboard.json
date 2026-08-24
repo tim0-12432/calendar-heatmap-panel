@@ -1,0 +1,244 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "trlxrdZVk"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "noValue": "-",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "errors"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "aggregation": "sum",
+        "autoRectSize": true,
+        "colorScheme": "custom-gradient",
+        "customColor": "#22c55e",
+        "emptyColor": "semi-dark-green",
+        "enableDataLinks": true,
+        "gradientColorHigh": "red",
+        "gradientColorLow": "green",
+        "monthLabelCustom": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+        "monthLabelMode": "default",
+        "radius": 2,
+        "rectSize": 11,
+        "showLegend": true,
+        "showMonthLabels": true,
+        "showTooltip": true,
+        "showWeekLabels": true,
+        "space": 3,
+        "useTimeRangeOfData": true,
+        "weekLabelCustom": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+        "weekLabelMode": "default",
+        "weekStart": "sunday"
+      },
+      "pluginVersion": "1.2.0",
+      "targets": [
+        {
+          "csvContent": "date,amount\r\n2026-04-01,5\r\n2026-04-02,1\r\n2026-04-04,6\r\n2026-04-05,5\r\n2026-04-06,10\r\n2026-04-07,4\r\n2026-04-09,5\r\n2026-04-10,5\r\n2026-04-11,6\r\n2026-04-12,5\r\n2026-04-13,1\r\n2026-04-14,3\r\n2026-04-15,2\r\n2026-04-16,1\r\n2026-04-17,1\r\n2026-04-20,5\r\n2026-04-21,5\r\n2026-04-22,8\r\n2026-04-24,3\r\n2026-04-25,2\r\n2026-04-26,4\r\n2026-04-27,1\r\n2026-04-28,6\r\n2026-04-29,5\r\n2026-04-30,2",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "df8l0llu668sgf"
+          },
+          "refId": "A",
+          "scenarioId": "csv_content"
+        }
+      ],
+      "title": "Failures",
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "dateFormat": "YYYY-MM-DD",
+                "destinationType": "time",
+                "targetField": "date"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "tim012432-calendarheatmap-panel"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 5,
+      "panels": [],
+      "repeat": "query",
+      "title": "Datasource multiplier $query",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "trlxrdZVk"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "id": 1,
+      "options": {
+        "aggregation": "sum",
+        "autoRectSize": true,
+        "colorScheme": "blue",
+        "customColor": "#3b82f6",
+        "emptyColor": "#293450",
+        "enableDataLinks": true,
+        "gradientColorHigh": "green",
+        "gradientColorLow": "#ff6e2f",
+        "monthLabelCustom": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+        "monthLabelMode": "default",
+        "radius": 2,
+        "rectSize": 11,
+        "seriesCountSize": "sm",
+        "showLegend": true,
+        "showMonthLabels": true,
+        "showSeriesCount": false,
+        "showTooltip": true,
+        "showWeekLabels": true,
+        "space": 3,
+        "text": "Default value of text input option",
+        "weekLabelCustom": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+        "weekLabelMode": "default",
+        "weekStart": "sunday"
+      },
+      "pluginVersion": "1.2.0",
+      "targets": [
+        {
+          "csvWave": [
+            {
+              "timeStep": 38700,
+              "valuesCSV": "0,0,10,10,1,1"
+            }
+          ],
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "db84e60d-b92a-4089-82cb-34842fb1754b"
+          },
+          "refId": "A",
+          "scenarioId": "predictable_csv_wave"
+        },
+        {
+          "datasource": {
+            "name": "Expression",
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "$A *  $query",
+          "hide": false,
+          "refId": "B",
+          "type": "math"
+        }
+      ],
+      "title": "Sample Heatmap Panel",
+      "type": "tim012432-calendarheatmap-panel"
+    }
+  ],
+  "preload": false,
+  "refresh": "",
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": [
+            "2",
+            "16"
+          ],
+          "value": [
+            "2",
+            "16"
+          ]
+        },
+        "description": "",
+        "multi": true,
+        "name": "query",
+        "options": [
+          {
+            "selected": true,
+            "text": "2x",
+            "value": "2"
+          },
+          {
+            "selected": true,
+            "text": "16x",
+            "value": "16"
+          }
+        ],
+        "query": "2x : 2, 16x : 16",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6M",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Provisioned calendar-heatmap-panel dashboard (Bug 43 Reproduction)",
+  "uid": "a538aeff-5c8a-42a5-901c-938d896fdd6f",
+  "version": 1
+}

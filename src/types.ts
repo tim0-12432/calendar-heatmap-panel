@@ -1,8 +1,10 @@
 export interface CalendarHeatmapOptions {
   // Colors
-  colorScheme: 'green' | 'blue' | 'red' | 'yellow' | 'purple' | 'orange' | 'custom';
+  colorScheme: 'green' | 'blue' | 'red' | 'yellow' | 'purple' | 'orange' | 'custom' | 'custom-gradient';
   emptyColor: string;
   customColor: string;
+  gradientColorLow: string;
+  gradientColorHigh: string;
 
   // Layout
   autoRectSize: boolean;
@@ -31,13 +33,22 @@ export interface CalendarHeatmapOptions {
 
   // Data
   aggregation: 'sum' | 'count' | 'avg' | 'max' | 'min' | 'last' | 'first';
+  conversionUnit: string;
+  useTimeRangeOfData: boolean;
 
   // Interaction
   showTooltip: boolean;
+  enableDataLinks: boolean;
 }
 
 export interface HeatmapValue {
   date: string;
-  originalDate: string;
   count: number;
+  originalDate: string;
+  /** Index of the representative row in the source frame */
+  rowIndex?: number;
+  /** Index of the frame in data.series */
+  frameIndex?: number;
+  /** Index of the value field within that frame */
+  fieldIndex?: number;
 }

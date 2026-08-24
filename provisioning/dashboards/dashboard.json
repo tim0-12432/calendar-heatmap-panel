@@ -18,7 +18,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
   "links": [],
   "panels": [
     {
@@ -41,6 +40,12 @@
         "aggregation": "sum",
         "autoRectSize": true,
         "colorScheme": "green",
+        "customColor": "#22c55e",
+        "emptyColor": "#254e1f",
+        "gradientColorHigh": "#9dbf69",
+        "gradientColorLow": "#e1704a",
+        "monthLabelCustom": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+        "monthLabelMode": "default",
         "radius": 2,
         "rectSize": 11,
         "seriesCountSize": "sm",
@@ -50,15 +55,18 @@
         "showTooltip": true,
         "showWeekLabels": true,
         "space": 3,
-        "text": "Default value of text input option"
+        "text": "Default value of text input option",
+        "weekLabelCustom": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+        "weekLabelMode": "default",
+        "weekStart": "sunday"
       },
-      "pluginVersion": "2.0.0",
+      "pluginVersion": "1.1.2",
       "targets": [
         {
           "csvWave": [
             {
-              "timeStep": 78000,
-              "valuesCSV": "0,0,2,2,1,1"
+              "timeStep": 35000,
+              "valuesCSV": "0,0,10,10,1,1"
             }
           ],
           "datasource": {
@@ -92,6 +100,11 @@
         "aggregation": "sum",
         "autoRectSize": true,
         "colorScheme": "green",
+        "customColor": "#22c55e",
+        "gradientColorHigh": "#ef4444",
+        "gradientColorLow": "#3b82f6",
+        "monthLabelCustom": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+        "monthLabelMode": "default",
         "radius": 2,
         "rectSize": 11,
         "seriesCountSize": "sm",
@@ -101,9 +114,12 @@
         "showTooltip": true,
         "showWeekLabels": true,
         "space": 3,
-        "text": "Default value of text input option"
+        "text": "Default value of text input option",
+        "weekLabelCustom": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+        "weekLabelMode": "default",
+        "weekStart": "sunday"
       },
-      "pluginVersion": "2.0.0",
+      "pluginVersion": "1.1.2",
       "targets": [
         {
           "alias": "",
@@ -318,7 +334,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Provisioned calendar-heatmap-panel dashboard",
+  "title": "Provisioned default calendar-heatmap-panel dashboard",
   "uid": "a538aeff-5a8a-42a5-901c-938d896fdd6f",
-  "version": 4
+  "version": 1
 }

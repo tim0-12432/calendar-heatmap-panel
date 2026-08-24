@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { PanelProps } from '@grafana/data';
-import { useTheme2, Tooltip } from '@grafana/ui';
+import React, { useCallback, useMemo } from 'react';
+import { DataFrame, Field, FieldConfig, getLinksSupplier, LinkModel, PanelProps } from '@grafana/data';
+import { useTheme2, Tooltip, DataLinksContextMenu } from '@grafana/ui';
 import HeatMap from '@uiw/react-heat-map';
 import { CalendarHeatmapOptions, HeatmapValue } from '../types';
 import { processTimeSeriesData } from '../utils/dataProcessor';
@@ -13,9 +13,13 @@ import {
   getWeekCount,
   formatDate,
   reverseShift,
+  toLocalMidnight,
+  getLibraryStartDate,
+  endOfDay,
 } from '../utils/dateHelpers';
 import { css } from '@emotion/css';
 import { t } from '@grafana/i18n';
+import { formatValue } from '../utils/unitHelpers';
 
 interface Props extends PanelProps<CalendarHeatmapOptions> {}
 
@@ -51,8 +55,23 @@ function getDefaultNumberOrCustom(
   return defaultLabels;
 }
 
-export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, options, timeRange, timeZone, title }) => {
+export const CalendarHeatmapPanel: React.FC<Props> = ({
+  data,
+  width,
+  height,
+  options,
+  timeRange,
+  timeZone,
+  title,
+  replaceVariables,
+}) => {
   const theme = useTheme2();
+
+  const ContextMenu = DataLinksContextMenu as React.FC<{
+    links: () => LinkModel[];
+    config: FieldConfig;
+    children: (api: { openMenu: React.MouseEventHandler<HTMLElement> }) => React.ReactNode;
+  }>;
 
   const heatmapData = useMemo(() => {
     return processTimeSeriesData(data.series, options.aggregation, timeZone);
@@ -66,8 +85,42 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
     return m;
   }, [heatmapData]);
 
-  const rawStartDate = useMemo(() => new Date(timeRange.from.valueOf()), [timeRange.from]);
-  const rawEndDate = useMemo(() => new Date(timeRange.to.valueOf()), [timeRange.to]);
+  const [rawStartDate, rawEndDate] = useMemo(() => {
+    const rawStart = new Date(timeRange.from.valueOf());
+    const rawEnd = new Date(timeRange.to.valueOf());
+    if (!options.useTimeRangeOfData || data.series.length === 0) {
+      return [rawStart, rawEnd];
+    }
+
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    for (const frame of data.series) {
+      const timeField = frame.fields.find((f) => f.type === 'time');
+      if (!timeField) {
+        continue;
+      }
+      for (const v of Array.from<unknown>(timeField.values as any)) {
+        if (v == null) {
+          continue;
+        }
+        const t = typeof v === 'number' ? v : new Date(v as any).getTime();
+        if (!Number.isFinite(t) || t <= 0) {
+          continue;
+        }
+        if (t < min) {
+          min = t;
+        }
+        if (t > max) {
+          max = t;
+        }
+      }
+    }
+    if (!Number.isFinite(min) || !Number.isFinite(max)) {
+      return [rawStart, rawEnd];
+    }
+
+    return [toLocalMidnight(min, timeZone), toLocalMidnight(max, timeZone)];
+  }, [timeRange, data.series, options.useTimeRangeOfData, timeZone]);
 
   const availableWidth = useMemo(() => Math.max(0, width - 32), [width]);
 
@@ -165,8 +218,94 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
   }, [heatmapData]);
 
   const colors = useMemo(() => {
-    return getColorPalette(options.colorScheme, theme, maxValue, options.emptyColor, options.customColor);
-  }, [options.colorScheme, options.emptyColor, options.customColor, theme, maxValue]);
+    return getColorPalette(
+      options.colorScheme,
+      theme,
+      maxValue,
+      options.emptyColor,
+      options.customColor,
+      options.gradientColorLow,
+      options.gradientColorHigh
+    );
+  }, [
+    options.colorScheme,
+    options.emptyColor,
+    options.customColor,
+    options.gradientColorLow,
+    options.gradientColorHigh,
+    theme,
+    maxValue,
+  ]);
+
+  // sample equally from color palette, making sure to include first and last element
+  const legendEntries = useMemo(() => {
+    const entries = Object.entries(colors)
+      .map(([key, color]) => [Number(key), color] as const)
+      .filter(([key]) => !Number.isNaN(key) && key !== 0 && key !== 1)
+      .sort(([a], [b]) => a - b);
+
+    const legendColorCount = 4;
+    if (entries.length <= legendColorCount) {
+      return entries;
+    }
+
+    return Array.from({ length: legendColorCount }, (_, i) => {
+      const idx = Math.round((i * (entries.length - 1)) / (legendColorCount - 1));
+      return entries[idx];
+    });
+  }, [colors]);
+
+  const getLinksForCell = useCallback(
+    (frame: DataFrame, field: Field<any>, tile: HeatmapValue): LinkModel[] => {
+      const scopedVars = {
+        ...(field.state?.scopedVars ?? {}),
+        __rect: {
+          value: {
+            value: tile.count,
+            date: tile.originalDate.replaceAll('/', '-'),
+          },
+          text: String(tile.count),
+        },
+      };
+      const getLinks = getLinksSupplier(frame, field, scopedVars, replaceVariables, timeZone);
+      return getLinks({
+        valueRowIndex: tile.rowIndex,
+      });
+    },
+    [replaceVariables, timeZone]
+  );
+
+  const linksByOriginalDate = useMemo(() => {
+    const m = new Map<string, () => LinkModel[]>();
+    for (const d of heatmapData) {
+      if (d.frameIndex === undefined || d.fieldIndex === undefined || d.rowIndex === undefined) {
+        continue;
+      }
+      const frame = data.series[d.frameIndex];
+      const field = data.series[d.frameIndex]?.fields[d.fieldIndex];
+      if (!frame || !field?.config.links?.length) {
+        continue;
+      }
+      m.set(d.originalDate, () => {
+        return getLinksForCell(frame, field, d);
+      });
+    }
+    return m;
+  }, [heatmapData, data.series, getLinksForCell]);
+
+  const fieldConfigByOriginalDate = useMemo(() => {
+    const m = new Map<string, FieldConfig>();
+    for (const d of heatmapData) {
+      if (d.frameIndex === undefined || d.fieldIndex === undefined) {
+        continue;
+      }
+      const field = data.series[d.frameIndex]?.fields[d.fieldIndex];
+      if (field) {
+        m.set(d.originalDate, field.config);
+      }
+    }
+    return m;
+  }, [heatmapData, data.series]);
 
   // Styles
   const styles = useMemo(
@@ -203,7 +342,7 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
 
         /* Correct week labels off placement */
         > text.w-heatmap-week {
-          transform: translateY(-${computedRectSize/2+options.space/2}px); 
+          transform: translateY(-${computedRectSize / 2 + options.space / 2}px);
         }
       `,
       legend: css`
@@ -227,6 +366,9 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
     [theme, options.radius, title, options.space, computedRectSize]
   );
 
+  const libStartDate = useMemo(() => getLibraryStartDate(shiftedStartDate), [shiftedStartDate]);
+  const libEndOfDayDate = useMemo(() => endOfDay(shiftedEndDate), [shiftedEndDate]);
+
   if (data.series.length === 0) {
     return (
       <div className={styles.container}>
@@ -240,8 +382,8 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
       <HeatMap
         className={styles.heatmap}
         value={shiftedHeatmapData}
-        startDate={shiftedStartDate}
-        endDate={shiftedEndDate}
+        startDate={libStartDate}
+        endDate={libEndOfDayDate}
         width={availableWidth}
         height={availableHeight}
         rectSize={computedRectSize}
@@ -257,17 +399,45 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
           const originalCount = countByOriginalDate.get(typedCell.originalDate);
           const tooltipContent =
             originalCount !== undefined
-              ? `${date}: ${originalCount.toLocaleString()}`
+              ? `${date}: ${formatValue(originalCount, options.conversionUnit)}`
               : `${date}: ${t('panel.component.tooltip.noData', 'No data')}`;
+          const getLinks = linksByOriginalDate.get(typedCell.originalDate);
+          const fieldConfig = fieldConfigByOriginalDate.get(typedCell.originalDate) ?? {};
+          const hasLinks = options.enableDataLinks !== false && Boolean(getLinks);
 
-          if (!options.showTooltip) {
-            return <rect {...props} rx={options.radius} />;
+          const rect = (extra?: { onClick?: React.MouseEventHandler<SVGRectElement> }) => (
+            <rect
+              {...props}
+              rx={options.radius}
+              onClick={extra?.onClick}
+              style={hasLinks ? { ...props.style, cursor: 'pointer' } : props.style}
+            />
+          );
+
+          const withTooltip = (child: React.ReactElement) =>
+            options.showTooltip ? (
+              <Tooltip content={tooltipContent} placement="top">
+                {child}
+              </Tooltip>
+            ) : (
+              child
+            );
+
+          if (!hasLinks) {
+            return withTooltip(rect());
           }
 
           return (
-            <Tooltip content={tooltipContent} placement="top">
-              <rect {...props} rx={options.radius} />
-            </Tooltip>
+            <ContextMenu links={getLinks!} config={fieldConfig}>
+              {(api) => (
+                <g
+                  onClick={api.openMenu as unknown as React.MouseEventHandler<SVGGElement>}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {withTooltip(rect())}
+                </g>
+              )}
+            </ContextMenu>
           );
         }}
       />
@@ -275,22 +445,18 @@ export const CalendarHeatmapPanel: React.FC<Props> = ({ data, width, height, opt
       {options.showLegend && (
         <div className={styles.legend}>
           <span>{t('panel.component.legend.less', 'Less')}</span>
-          {Object.entries(colors)
-            .map(([key, color]) => [Number(key), color] as const)
-            .filter(([key]) => !Number.isNaN(key) && key !== 1)
-            .sort(([a], [b]) => a - b)
-            .map(([key, color]) => (
-              <div
-                key={key}
-                className={styles.legendRect}
-                style={{ backgroundColor: color }}
-                title={t('panel.component.legend.tooltip', 'Level {{level}}', { level: key })}
-              />
-            ))}
+          {legendEntries.map(([key, color]) => (
+            <div
+              key={key}
+              className={styles.legendRect}
+              style={{ backgroundColor: color }}
+              title={t('panel.component.legend.tooltip', 'Level {{level}}', { level: key })}
+            />
+          ))}
           <span>{t('panel.component.legend.more', 'More')}</span>
           {maxValue > 0 && (
             <span style={{ marginLeft: 8 }}>
-              ({t('panel.component.legend.max', 'Max')}: {maxValue.toLocaleString()})
+              ({t('panel.component.legend.max', 'Max')}: {formatValue(maxValue, options.conversionUnit)})
             </span>
           )}
         </div>

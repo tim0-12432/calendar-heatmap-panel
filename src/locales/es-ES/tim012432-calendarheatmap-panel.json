@@ -36,6 +36,13 @@
       }
     },
     "options": {
+      "categories": {
+        "colors": "Colores",
+        "layout": "Diseño",
+        "labels": "Etiquetas",
+        "data": "Datos",
+        "interaction": "Interacción"
+      },
       "aggregation": {
         "description": "Cómo agregar múltiples puntos de datos en el mismo día",
         "name": "Agregación",
@@ -63,7 +70,8 @@
           "purple": "Púrpura",
           "red": "Rojo",
           "yellow": "Amarillo",
-          "custom": "Personalizado"
+          "custom": "Personalizado",
+          "customGradient": "Degradado Personalizado"
         }
       },
       "radius": {
@@ -102,6 +110,18 @@
         "description": "Color base para la paleta personalizada (otros colores se derivarán de este)",
         "name": "Tema de Color Personalizado"
       },
+      "customGradient": {
+        "description": "Degradado personalizado definido por dos colores",
+        "name": "Degradado personalizado"
+      },
+      "gradientColorLow": {
+        "description": "Color utilizado para los valores más bajos en el degradado",
+        "name": "Degradado Color Bajo"
+      },
+      "gradientColorHigh": {
+        "description": "Color utilizado para los valores más altos en el degradado",
+        "name": "Degradado Color Alto"
+      },
       "monthLabelMode": {
         "description": "Cómo renderizar las etiquetas de los meses",
         "name": "Modo de Etiqueta de Mes",
@@ -136,6 +156,18 @@
           "sunday": "Domingo",
           "monday": "Lunes"
         }
+      },
+      "enableDataLinks": {
+        "description": "Hacer que las celdas sean clicables cuando los enlaces de datos están configurados en el campo",
+        "name": "Habilitar Enlaces de Datos"
+      },
+      "conversionUnit": {
+        "description": "Elegir una unidad para la conversión",
+        "name": "Unidad"
+      },
+      "useTimeRangeOfData": {
+        "description": "Utilizar el rango de tiempo de los datos en lugar del rango de tiempo del dashboard",
+        "name": "Utilizar el rango de tiempo de los datos"
       }
     }
   }
