@@ -29,3 +29,7 @@ jobs:
           policy_token: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
           # Usage of GRAFANA_API_KEY is deprecated, prefer `policy_token` option above
           #grafana_token: $
+          # creates a signed build provenance attestation to verify the authenticity of the plugin build
+          attestation: true
+          # pnpm requires a specific node version to run, so we set it here
+          node-version: 22
