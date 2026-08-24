@@ -1,6 +1,8 @@
 import { expect, test, type PanelEditPage } from '@grafana/plugin-e2e';
 import type { APIRequestContext, Locator, Page, Playwright } from '@playwright/test';
 
+import { dismissAnnouncements, hoverWithBannerRetry } from './helpers';
+
 const DASHBOARD_FILE = 'dashboard.json';
 const PANEL_WITH_DATA_ID = '1';
 const PANEL_NO_DATA_ID = '2';
@@ -1123,7 +1125,11 @@ test(
     const tooltipTextPattern = new RegExp(`^${enabledYear}\\/${enabledMonth}\\/${enabledDay}: \\S+`);
     const tooltipLocator = tooltipEnabledPage.ctx.page.getByText(tooltipTextPattern);
 
-    await enabledTargetCell.hover();
+    // Dismiss any Grafana announcement banner that may overlay the panel and
+    // intercept pointer events on certain CI images (e.g. the "Grafana
+    // Assistant is now available to OSS users" banner).
+    await dismissAnnouncements(tooltipEnabledPage.ctx.page);
+    await hoverWithBannerRetry(enabledTargetCell);
 
     await expect(tooltipLocator.first()).toBeVisible({ timeout: EXPECT_TIMEOUT });
     const tooltipText = await tooltipLocator.first().textContent();
@@ -1166,7 +1172,10 @@ test(
       new RegExp(`^${disabledYear}\\/${disabledMonth}\\/${disabledDay}: \\S+`)
     );
 
-    await disabledTargetCell.hover();
+    // Dismiss any announcement banner that may reappear on the freshly opened
+    // panel edit page before hovering the cell.
+    await dismissAnnouncements(tooltipDisabledPage.ctx.page);
+    await hoverWithBannerRetry(disabledTargetCell);
     // Bounded wait to give any lingering tooltip time to dismiss before the
     // negative assertion below; there is no deterministic "tooltip gone" signal.
     await tooltipDisabledPage.ctx.page.waitForTimeout(1_500);
