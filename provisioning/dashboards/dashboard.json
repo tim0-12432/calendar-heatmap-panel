@@ -41,7 +41,7 @@
         "autoRectSize": true,
         "colorScheme": "green",
         "customColor": "#22c55e",
-        "emptyColor": "#e35969",
+        "emptyColor": "#254e1f",
         "gradientColorHigh": "#9dbf69",
         "gradientColorLow": "#e1704a",
         "monthLabelCustom": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
