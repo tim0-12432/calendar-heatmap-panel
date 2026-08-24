@@ -61,7 +61,7 @@ type HeatmapCellFill = {
 type PanelOptionsOverrides = Record<string, unknown>;
 
 // Creates an API request context that is authenticated via a Grafana session
-// cookie obtained from POST /api/login. Unlike the anonymous-auth fallback used
+// cookie obtained from POST /login. Unlike the anonymous-auth fallback used
 // previously, this works both with anonymous auth enabled (local dev) and
 // disabled (CI), because every call carries real admin credentials' session.
 async function createAuthenticatedRequestContext(playwright: Playwright): Promise<APIRequestContext> {

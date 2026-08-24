@@ -78,21 +78,17 @@ function aggregate(values: TimestampedValue[], method: Aggregation): { count: nu
     case 'avg':
       return { count: values.reduce((a, b) => a + b.value, 0) / values.length, source: values[lastValIdx] };
     case 'max':
-      const maxVal = Math.max(...values.map((v) => v.value));
-      const maxIdx = values.findIndex((v) => v.value === maxVal);
-      return { count: maxVal, source: values[maxIdx] };
+      const max = values.reduce((highest, cur) => (cur.value > highest.value ? cur : highest));
+      return { count: max.value, source: max };
     case 'min':
-      const minVal = Math.min(...values.map((v) => v.value));
-      const minIdx = values.findIndex((v) => v.value === minVal);
-      return { count: minVal, source: values[minIdx] };
+      const min = values.reduce((lowest, cur) => (cur.value < lowest.value ? cur : lowest));
+      return { count: min.value, source: min };
     case 'last':
-      const lastVal = values.reduce((latest, cur) => (cur.timestamp > latest.timestamp ? cur : latest)).value;
-      const lastIdx = values.findIndex((v) => v.value === lastVal);
-      return { count: lastVal, source: values[lastIdx] };
+      const last = values.reduce((latest, cur) => (cur.timestamp > latest.timestamp ? cur : latest));
+      return { count: last.value, source: last };
     case 'first':
-      const firstVal = values.reduce((earliest, cur) => (cur.timestamp < earliest.timestamp ? cur : earliest)).value;
-      const firstIdx = values.findIndex((v) => v.value === firstVal);
-      return { count: firstVal, source: values[firstIdx] };
+      const first = values.reduce((earliest, cur) => (cur.timestamp < earliest.timestamp ? cur : earliest));
+      return { count: first.value, source: first };
     default:
       return { count: values[0].value, source: values[0] };
   }

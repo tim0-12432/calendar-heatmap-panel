@@ -273,10 +273,8 @@ describe('processTimeSeriesData', () => {
       expect(result[0]).toMatchObject({ frameIndex: 1, fieldIndex: 1, rowIndex: 0 });
     });
 
-    it('returns first matching row for duplicate values (current behavior)', () => {
-      // Values [5, 9, 9]: max is 9, which occurs at rowIndex 1 and 2.
-      // The implementation locates the source via findIndex on value equality,
-      // so it reports rowIndex 1 even though Math.max saw the later occurrence.
+    it('retains the selected source row when values are duplicated', () => {
+      // Values [5, 9, 9]: max is 9, and the selected source is the first maximum.
       const series = [
         buildFrame([
           { name: 'time', type: FieldType.time, values: [1000, 2000, 3000] },
@@ -297,8 +295,6 @@ describe('processTimeSeriesData', () => {
       );
       expect(minResult[0].rowIndex).toBe(0);
 
-      // 'last': the latest timestamp carries value 7 (rowIndex 2), but value 7
-      // also appears earlier, so findIndex resolves to the earlier row.
       const lastResult = processTimeSeriesData(
         [
           buildFrame([
@@ -308,10 +304,8 @@ describe('processTimeSeriesData', () => {
         ],
         'last'
       );
-      expect(lastResult[0].rowIndex).toBe(0);
+      expect(lastResult[0].rowIndex).toBe(2);
 
-      // 'first': the earliest timestamp carries value 5 (rowIndex 1), but
-      // findIndex matches the duplicate value at rowIndex 0.
       const firstResult = processTimeSeriesData(
         [
           buildFrame([
@@ -321,7 +315,7 @@ describe('processTimeSeriesData', () => {
         ],
         'first'
       );
-      expect(firstResult[0].rowIndex).toBe(0);
+      expect(firstResult[0].rowIndex).toBe(1);
     });
   });
 });

@@ -39,7 +39,7 @@
       "options": {
         "aggregation": "sum",
         "autoRectSize": true,
-        "colorScheme": "custom-gradient",
+        "colorScheme": "green",
         "customColor": "#22c55e",
         "emptyColor": "#e35969",
         "gradientColorHigh": "#9dbf69",
