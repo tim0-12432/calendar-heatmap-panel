@@ -187,7 +187,7 @@ jobs:
         run: pnpm e2e
 
       - name: Upload e2e test summary
-        uses: grafana/plugin-actions/playwright-gh-pages/upload-report-artifacts@upload-report-artifacts/v1.0.1
+        uses: grafana/plugin-actions/playwright-gh-pages/upload-report-artifacts@upload-report-artifacts/v1.0.2
         if: ${{ always() && !cancelled() }}
         with:
           upload-report: false
