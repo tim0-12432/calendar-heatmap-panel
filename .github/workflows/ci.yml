@@ -27,7 +27,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js and pnpm environment
-        uses: pnpm/setup@v2
+        uses: pnpm/setup@v3
 
       - name: Check types
         run: pnpm typecheck
@@ -167,7 +167,7 @@ jobs:
           chmod +x ./dist/gpx_*
 
       - name: Setup Node.js and pnpm environment
-        uses: pnpm/setup@v2
+        uses: pnpm/setup@v3
 
       - name: Start Grafana
         run: |
