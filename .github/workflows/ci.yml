@@ -27,7 +27,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js and pnpm environment
-        uses: pnpm/setup@v2
+        uses: pnpm/setup@v3
 
       - name: Check types
         run: pnpm typecheck
@@ -133,7 +133,7 @@ jobs:
 
       - name: Resolve Grafana E2E versions
         id: resolve-versions
-        uses: grafana/plugin-actions/e2e-version@e2e-version/v3.0.2
+        uses: grafana/plugin-actions/e2e-version@e2e-version/v3.2.0
         with:
           skip-grafana-react-19-preview-image: false
 
@@ -167,7 +167,7 @@ jobs:
           chmod +x ./dist/gpx_*
 
       - name: Setup Node.js and pnpm environment
-        uses: pnpm/setup@v2
+        uses: pnpm/setup@v3
 
       - name: Start Grafana
         run: |
@@ -187,7 +187,7 @@ jobs:
         run: pnpm e2e
 
       - name: Upload e2e test summary
-        uses: grafana/plugin-actions/playwright-gh-pages/upload-report-artifacts@upload-report-artifacts/v1.0.2
+        uses: grafana/plugin-actions/playwright-gh-pages/upload-report-artifacts@upload-report-artifacts/v1.0.3
         if: ${{ always() && !cancelled() }}
         with:
           upload-report: false
