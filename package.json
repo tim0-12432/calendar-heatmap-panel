@@ -1,6 +1,6 @@
 {
   "name": "calendar-heatmap-panel",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
@@ -65,7 +65,7 @@
     "webpack-virtual-modules": "0.6.2"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "dependencies": {
     "@emotion/css": "11.13.5",
@@ -82,7 +82,7 @@
   "devEngines": {
     "runtime": {
       "name": "node",
-      "version": "^22.0.0",
+      "version": "^24.0.0",
       "onFail": "download"
     }
   }
