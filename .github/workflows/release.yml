@@ -34,4 +34,4 @@ jobs:
           # creates a signed build provenance attestation to verify the authenticity of the plugin build
           attestation: true
           # pnpm requires a specific node version to run, so we set it here
-          node-version: 22
+          node-version: 24
