@@ -72,7 +72,7 @@
     "@grafana/data": "12.4.6",
     "@grafana/i18n": "12.4.6",
     "@grafana/runtime": "12.4.6",
-    "@grafana/schema": "12.4.6",
+    "@grafana/schema": "13.2.4",
     "@grafana/ui": "12.4.6",
     "@uiw/react-heat-map": "2.3.3",
     "react": "18.3.1",
