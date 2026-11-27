@@ -276,6 +276,7 @@ pnpm lint:fix     # Autofix lint issues
 pnpm typecheck    # TypeScript type checking
 pnpm test         # Unit tests (watch)
 pnpm test:ci      # Unit tests (CI mode)
+pnpm test:dst     # Unit tests in a DST time zone (Europe/Berlin)
 pnpm e2e          # Playwright end-to-end tests
 pnpm sign         # Sign plugin for distribution
 ```
