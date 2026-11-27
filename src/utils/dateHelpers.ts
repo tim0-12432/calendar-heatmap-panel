@@ -16,10 +16,12 @@ function getLastWeekStartDate(date: Date, weekStart: 'saturday' | 'sunday' | 'mo
 
 /**
  * Computes the start date we hand to @uiw/react-heat-map.
- * The library internally snaps any non-Sunday startDate back to Sunday using
- * millisecond arithmetic, which produces a wrong date when the subtraction
- * crosses a DST transition (e.g. 2026-03-29 in Europe). By passing an exact
- * Sunday (local midnight) ourselves, the library skips its own snap in SVG.js.
+ * The library snaps any startDate back to the Sunday on or before it and is
+ * DST-safe while doing so since 2.3.4 (it adjusts calendar components instead
+ * of subtracting milliseconds, which used to produce a wrong date when the
+ * subtraction crossed a DST transition, e.g. 2026-03-29 in Europe). We still
+ * pass an explicit local-midnight Sunday so the grid origin is explicit and
+ * does not depend on the library's internal normalisation.
  *
  * The caller passes an already render-shifted date (see shiftDates), so here we
  * only snap that date back to the Sunday on or before it. We do NOT snap to the
@@ -31,9 +33,9 @@ export function getLibraryStartDate(date: Date): Date {
 }
 
 /**
- * End of day (23:59:59.999) in local time. The heat-map library compares cell
- * timestamps against endDate using millisecond math and drifts +1h across a
- * DST transition, which would drop the last day if endDate were midnight.
+ * End of day (23:59:59.999) in local time. The heat-map library keeps a cell
+ * while its local-midnight timestamp is not after endDate, so ending the range
+ * at the end of the final day keeps that whole day inside the inclusive range.
  */
 export function endOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
@@ -104,9 +106,10 @@ export function shiftHeatMapData(
   timeZone?: string
 ): HeatmapValue[] {
   const renderShiftDays = getRenderShiftDays(weekstart);
-  // Note: @uiw/react-heat-map mutates value[].date in place during rendering,
-  // so returning the original array here exposes originals to that mutation.
-  // This is safe because all panel lookups key off `originalDate`, never `date`.
+  // Note: @uiw/react-heat-map no longer mutates value[].date in place (since
+  // 2.3.4 its formatData copies each entry), so returning the original array
+  // here leaves it unchanged for 'sunday' mode. All panel lookups key off
+  // `originalDate`, never the shifted `date`.
   if (renderShiftDays === 0) {
     return heatmapData;
   }
